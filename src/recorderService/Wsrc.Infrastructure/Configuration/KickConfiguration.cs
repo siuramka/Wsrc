@@ -1,3 +1,5 @@
+using Wsrc.Domain;
+
 namespace Wsrc.Infrastructure.Configuration;
 
 public class KickConfiguration
@@ -6,5 +8,5 @@ public class KickConfiguration
 
     public required string PusherConnectionString { get; init; }
 
-    public IEnumerable<string> Channels { get; init; } = [];
+    public IEnumerable<KickChannel> Channels { get; init; } = [];
 }

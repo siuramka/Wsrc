@@ -1,6 +1,7 @@
 using Wsrc.Infrastructure.Configuration;
 using Wsrc.Infrastructure.Interfaces;
 using Wsrc.Infrastructure.Services;
+using Wsrc.Infrastructure.Services.Kick;
 
 namespace Wsrc.Consumer;
 
@@ -14,7 +15,7 @@ public class Program
         builder.Services.Configure<RabbitMqConfiguration>(configuration.GetSection(RabbitMqConfiguration.Section));
         builder.Services.Configure<KickConfiguration>(configuration.GetSection(KickConfiguration.Section));
 
-        builder.Services.AddSingleton<IRabbitMqService, RabbitMqService>();
+        builder.Services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
         builder.Services.AddSingleton<IConsumerService, KickConsumerService>();
 
         builder.Services.AddHostedService<ConsumerWorkerService>();

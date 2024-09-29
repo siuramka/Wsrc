@@ -13,12 +13,18 @@ public class KickPusherClient(
     : IKickPusherClient
 {
     private readonly ClientWebSocket _socketClient = new();
-    public required string ChatRoomId { get; init; }
 
-    public async Task ConnectAsync(KickChatConnectionRequest connectionRequest)
+    public string ChannelName { get; init; }
+
+    public string ChannelId { get; init; }
+
+    public async Task ConnectAsync()
     {
         await _socketClient.ConnectAsync(new Uri(kickConfig.Value.PusherConnectionString), CancellationToken.None);
+    }
 
+    public async Task SubscribeAsync(KickChatConnectionRequest connectionRequest)
+    {
         var connectionData = JsonSerializer.Serialize(connectionRequest);
         await Send(connectionData);
     }

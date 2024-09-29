@@ -5,9 +5,13 @@ namespace Wsrc.Infrastructure.Interfaces;
 
 public interface IKickPusherClient
 {
-    string ChatRoomId { get; init; }
+    public string ChannelName { get; init; }
 
-    Task ConnectAsync(KickChatConnectionRequest connectionRequest);
+    public string ChannelId { get; init; }
+
+    Task ConnectAsync();
+
+    Task SubscribeAsync(KickChatConnectionRequest connectionRequest);
 
     Task CloseAsync();
 

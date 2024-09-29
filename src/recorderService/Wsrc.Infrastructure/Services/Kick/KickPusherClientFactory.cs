@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using Wsrc.Domain;
 using Wsrc.Infrastructure.Configuration;
 using Wsrc.Infrastructure.Interfaces;
 
@@ -6,16 +7,17 @@ namespace Wsrc.Infrastructure.Services.Kick;
 
 public class KickPusherClientFactory(IOptions<KickConfiguration> kickConfiguration) : IKickPusherClientFactory
 {
-    public IKickPusherClient CreateClient(string chatroomId)
+    public IKickPusherClient CreateClient(KickChannel channel)
     {
         return new KickPusherClient(kickConfiguration)
         {
-            ChatRoomId = chatroomId
+            ChannelName = channel.Name,
+            ChannelId = channel.Id,
         };
     }
 
-    public IEnumerable<IKickPusherClient> CreateClients(IEnumerable<string> chatroomIds)
+    public IEnumerable<IKickPusherClient> CreateClients(IEnumerable<KickChannel> channels)
     {
-        return chatroomIds.Select(CreateClient);
+        return channels.Select(CreateClient);
     }
 }

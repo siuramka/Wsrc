@@ -4,7 +4,7 @@ namespace Wsrc.Domain;
 
 public class KickChatConnectionRequest(string chatroomId, PusherEvent pusherEvent)
 {
-    [JsonPropertyName("event")] public string Event { get; } = pusherEvent.Name;
+    [JsonPropertyName("event")] public string Event { get; } = pusherEvent.Event;
 
     [JsonPropertyName("data")]
     public KickChatConnectionRequestData Data { get; } = new()

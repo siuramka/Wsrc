@@ -6,6 +6,7 @@ public class ConsumerWorkerService(IConsumerService consumerService) : Backgroun
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        await consumerService.ConnectAsync();
         await consumerService.ReadMessages();
     }
 }

@@ -1,8 +1,10 @@
+using Wsrc.Domain;
+
 namespace Wsrc.Infrastructure.Interfaces;
 
 public interface IKickPusherClientFactory
 {
-    IKickPusherClient CreateClient(string chatroomId);
+    IKickPusherClient CreateClient(KickChannel channel);
 
-    public IEnumerable<IKickPusherClient> CreateClients(IEnumerable<string> chatroomIds);
+    public IEnumerable<IKickPusherClient> CreateClients(IEnumerable<KickChannel> channels);
 }

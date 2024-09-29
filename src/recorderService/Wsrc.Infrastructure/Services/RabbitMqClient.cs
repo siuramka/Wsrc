@@ -5,7 +5,7 @@ using Wsrc.Infrastructure.Interfaces;
 
 namespace Wsrc.Infrastructure.Services;
 
-public class RabbitMqService(IOptions<RabbitMqConfiguration> options) : IRabbitMqService
+public class RabbitMqClient(IOptions<RabbitMqConfiguration> options) : IRabbitMqClient
 {
     private readonly RabbitMqConfiguration _configuration = options.Value;
 

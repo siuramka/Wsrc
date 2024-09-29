@@ -17,8 +17,10 @@ public class Program
         builder.Services.Configure<RabbitMqConfiguration>(configuration.GetSection(RabbitMqConfiguration.Section));
         builder.Services.Configure<KickConfiguration>(configuration.GetSection(KickConfiguration.Section));
 
+        //todo fix lifetimes
         builder.Services.AddSingleton<IKickPusherClientFactory, KickPusherClientFactory>();
-        builder.Services.AddSingleton<IRabbitMqService, RabbitMqService>();
+        builder.Services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
+        builder.Services.AddSingleton<IProducerService, KickProducerService>();
 
         builder.Services.AddHostedService<ProducerWorkerService>();
 
