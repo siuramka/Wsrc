@@ -1,3 +1,4 @@
+using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Wsrc.Infrastructure.Interfaces;
@@ -16,26 +17,17 @@ public class KickConsumerService(IRabbitMqService rabbitMqService) : IConsumerSe
         _connection = await rabbitMqService.CreateConnectionAsync();
         _channel = await _connection.CreateChannelAsync();
 
-        await _channel.QueueDeclareAsync(_queueName, durable: true, exclusive: false, autoDelete: false);
-        await _channel.ExchangeDeclareAsync("UserExchange", ExchangeType.Fanout, durable: true, autoDelete: false);
-        await _channel.QueueBindAsync(_queueName, exchange: "UserExchange", routingKey: string.Empty);
+        await _channel.QueueDeclareAsync(_queueName, true, false, false);
+        await _channel.ExchangeDeclareAsync("UserExchange", ExchangeType.Fanout, true, false);
+        await _channel.QueueBindAsync(_queueName, "UserExchange", string.Empty);
     }
 
     public async Task ReadMessages()
     {
         var consumer = new AsyncEventingBasicConsumer(_channel);
         consumer.Received += OnConsumerOnReceived;
-        await _channel.BasicConsumeAsync(_queueName, autoAck: false, consumer);
+        await _channel.BasicConsumeAsync(_queueName, false, consumer);
         await Task.CompletedTask;
-    }
-
-    private async Task OnConsumerOnReceived(object ch, BasicDeliverEventArgs ea)
-    {
-        var body = ea.Body.ToArray();
-        var text = System.Text.Encoding.UTF8.GetString(body);
-        Console.WriteLine(text);
-        await Task.CompletedTask;
-        await _channel.BasicAckAsync(ea.DeliveryTag, false);
     }
 
     public async ValueTask DisposeAsync()
@@ -52,5 +44,14 @@ public class KickConsumerService(IRabbitMqService rabbitMqService) : IConsumerSe
             else
                 resource.Dispose();
         }
+    }
+
+    private async Task OnConsumerOnReceived(object ch, BasicDeliverEventArgs ea)
+    {
+        var body = ea.Body.ToArray();
+        var text = Encoding.UTF8.GetString(body);
+        Console.WriteLine(text);
+        await Task.CompletedTask;
+        await _channel.BasicAckAsync(ea.DeliveryTag, false);
     }
 }

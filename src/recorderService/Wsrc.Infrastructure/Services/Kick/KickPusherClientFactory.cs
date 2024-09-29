@@ -10,7 +10,7 @@ public class KickPusherClientFactory(IOptions<KickConfiguration> kickConfigurati
     {
         return new KickPusherClient(kickConfiguration)
         {
-            ChatRoomId = chatroomId,
+            ChatRoomId = chatroomId
         };
     }
 

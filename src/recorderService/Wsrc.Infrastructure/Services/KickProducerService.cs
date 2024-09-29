@@ -4,5 +4,4 @@ namespace Wsrc.Infrastructure.Services;
 
 public class KickProducerService : IProducerService
 {
-    
 }

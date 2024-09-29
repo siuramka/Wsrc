@@ -11,7 +11,7 @@ public class RabbitMqService(IOptions<RabbitMqConfiguration> options) : IRabbitM
 
     public async Task<IConnection> CreateConnectionAsync()
     {
-        var defaultConnection = new ConnectionFactory()
+        var defaultConnection = new ConnectionFactory
         {
             UserName = _configuration.Username,
             Password = _configuration.Password,

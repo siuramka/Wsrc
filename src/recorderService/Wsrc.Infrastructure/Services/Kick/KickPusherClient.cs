@@ -12,9 +12,8 @@ public class KickPusherClient(
     IOptions<KickConfiguration> kickConfig)
     : IKickPusherClient
 {
-    public required string ChatRoomId { get; init; }
-
     private readonly ClientWebSocket _socketClient = new();
+    public required string ChatRoomId { get; init; }
 
     public async Task ConnectAsync(KickChatConnectionRequest connectionRequest)
     {
