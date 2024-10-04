@@ -1,7 +1,7 @@
+using Wsrc.Core.Interfaces;
 using Wsrc.Domain;
-using Wsrc.Infrastructure.Interfaces;
 
-namespace Wsrc.Infrastructure.Services.Kick.EventStrategies;
+namespace Wsrc.Core.Services.Kick.EventStrategies;
 
 public class ConnectedEvent : IKickEventStrategy
 {

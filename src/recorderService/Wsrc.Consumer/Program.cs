@@ -1,7 +1,7 @@
+using Wsrc.Core.Interfaces;
 using Wsrc.Infrastructure.Configuration;
 using Wsrc.Infrastructure.Interfaces;
 using Wsrc.Infrastructure.Services;
-using Wsrc.Infrastructure.Services.Kick;
 
 namespace Wsrc.Consumer;
 

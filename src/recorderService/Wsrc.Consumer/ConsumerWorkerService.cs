@@ -1,4 +1,4 @@
-using Wsrc.Infrastructure.Interfaces;
+using Wsrc.Core.Interfaces;
 
 namespace Wsrc.Consumer;
 

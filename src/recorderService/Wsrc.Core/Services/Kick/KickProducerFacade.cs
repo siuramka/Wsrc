@@ -1,9 +1,9 @@
 using System.Text;
 using System.Text.Json;
+using Wsrc.Core.Interfaces;
 using Wsrc.Domain;
-using Wsrc.Infrastructure.Interfaces;
 
-namespace Wsrc.Infrastructure.Services.Kick;
+namespace Wsrc.Core.Services.Kick;
 
 public class KickProducerFacade(
     IKickEventStrategyHandler kickEventStrategyHandler,
@@ -33,7 +33,6 @@ public class KickProducerFacade(
             ms.Seek(0, SeekOrigin.Begin);
 
             var data = await reader.ReadToEndAsync();
-            Console.WriteLine("data + " + data);
 
             var kickEvent = JsonSerializer.Deserialize<KickEvent>(data) ?? throw new InvalidOperationException();
             var pusherEvent = PusherEvent.Parse(kickEvent.Event);

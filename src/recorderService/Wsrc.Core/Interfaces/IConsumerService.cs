@@ -1,4 +1,4 @@
-namespace Wsrc.Infrastructure.Interfaces;
+namespace Wsrc.Core.Interfaces;
 
 public interface IConsumerService
 {

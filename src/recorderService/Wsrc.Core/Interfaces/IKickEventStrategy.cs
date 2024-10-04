@@ -1,6 +1,6 @@
 using Wsrc.Domain;
 
-namespace Wsrc.Infrastructure.Interfaces;
+namespace Wsrc.Core.Interfaces;
 
 public interface IKickEventStrategy
 {

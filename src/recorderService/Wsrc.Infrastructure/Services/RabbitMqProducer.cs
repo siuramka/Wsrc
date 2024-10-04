@@ -1,11 +1,11 @@
 using System.Text;
 using RabbitMQ.Client;
+using Wsrc.Core.Interfaces;
 using Wsrc.Infrastructure.Constants;
 using Wsrc.Infrastructure.Interfaces;
 
 namespace Wsrc.Infrastructure.Services;
 
-//TODO IBusClient - RabbitMqClient
 public class RabbitMqProducer(IRabbitMqClient rabbitMqClient) : IProducerService
 {
     public async Task SendMessage(string message)

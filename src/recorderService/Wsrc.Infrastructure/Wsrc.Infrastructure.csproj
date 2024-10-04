@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Wsrc.Core\Wsrc.Core.csproj" />
         <ProjectReference Include="..\Wsrc.Domain\Wsrc.Domain.csproj"/>
     </ItemGroup>
 

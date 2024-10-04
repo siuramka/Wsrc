@@ -1,3 +1,4 @@
+using Wsrc.Core.Interfaces;
 using Wsrc.Infrastructure.Interfaces;
 
 namespace Wsrc.Producer.Services;

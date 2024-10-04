@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Options;
+using Wsrc.Core.Interfaces;
 using Wsrc.Domain;
 using Wsrc.Infrastructure.Configuration;
-using Wsrc.Infrastructure.Interfaces;
 
-namespace Wsrc.Infrastructure.Services.Kick;
+namespace Wsrc.Infrastructure.Services;
 
 public class KickPusherClientManager(
     IKickPusherClientFactory pusherClientFactory,
