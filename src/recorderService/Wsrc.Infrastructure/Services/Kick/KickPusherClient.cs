@@ -36,7 +36,10 @@ public class KickPusherClient(
 
     public async Task Send(string data)
     {
-        await _socketClient.SendAsync(Encoding.UTF8.GetBytes(data), WebSocketMessageType.Text, true,
+        await _socketClient.SendAsync(
+            Encoding.UTF8.GetBytes(data),
+            WebSocketMessageType.Text,
+            true,
             CancellationToken.None);
     }
 

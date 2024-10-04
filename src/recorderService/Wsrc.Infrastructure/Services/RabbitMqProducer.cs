@@ -3,10 +3,10 @@ using RabbitMQ.Client;
 using Wsrc.Infrastructure.Constants;
 using Wsrc.Infrastructure.Interfaces;
 
-namespace Wsrc.Infrastructure.Services.Kick;
+namespace Wsrc.Infrastructure.Services;
 
 //TODO IBusClient - RabbitMqClient
-public class KickProducerService(IRabbitMqClient rabbitMqClient) : IProducerService
+public class RabbitMqProducer(IRabbitMqClient rabbitMqClient) : IProducerService
 {
     public async Task SendMessage(string message)
     {

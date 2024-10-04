@@ -1,38 +1,26 @@
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Options;
 using Wsrc.Domain;
-using Wsrc.Infrastructure.Configuration;
 using Wsrc.Infrastructure.Interfaces;
 
 namespace Wsrc.Infrastructure.Services.Kick;
 
 public class KickProducerFacade(
-    IOptions<KickConfiguration> kick,
-    IKickPusherClientFactory pusherClientFactory,
-    IRabbitMqClient rabbitMqClient,
-    IProducerService producerService)
+    IKickEventStrategyHandler kickEventStrategyHandler,
+    IKickPusherClientManager clientManager) : IKickProducerFacede
 {
     public async Task HandleMessages()
     {
-        var kickPusherClients = pusherClientFactory.CreateClients(kick.Value.Channels);
+        await clientManager.Launch();
 
-        foreach (var kickPusherClient in kickPusherClients)
+        foreach (var kickPusherClient in clientManager.ActiveConnections)
         {
-            var task = Task.Run(() => Task.FromResult(ProcessChannelMessages(kickPusherClient)));
+            _ = Task.Run(() => ProcessChannelMessages(kickPusherClient));
         }
     }
 
     private async Task ProcessChannelMessages(IKickPusherClient kickPusherClient)
     {
-        await kickPusherClient.ConnectAsync();
-
-        var connectionRequest = new KickChatConnectionRequest(
-            kickPusherClient.ChannelId,
-            PusherEvent.Subscribe);
-
-        await kickPusherClient.SubscribeAsync(connectionRequest);
-
         var ms = new MemoryStream();
         var reader = new StreamReader(ms, Encoding.UTF8);
         var buffer = new byte[1 * 1024];
@@ -47,33 +35,14 @@ public class KickProducerFacade(
             var data = await reader.ReadToEndAsync();
             Console.WriteLine("data + " + data);
 
-            var kickEvent = JsonSerializer.Deserialize<KickEvent>(data);
+            var kickEvent = JsonSerializer.Deserialize<KickEvent>(data) ?? throw new InvalidOperationException();
+            var pusherEvent = PusherEvent.Parse(kickEvent.Event);
 
-            await HandleEvent(kickEvent.Event, data);
-            Console.WriteLine(data);
+            var handler = kickEventStrategyHandler.GetStrategy(pusherEvent);
+            await handler.ExecuteAsync(data);
 
-            ms.SetLength(0); // Clear the MemoryStream
+            ms.SetLength(0);
             ms.Seek(0, SeekOrigin.Begin);
-        }
-    }
-
-    private async Task HandleEvent(string pusherEvent, string data)
-    {
-        if (pusherEvent == PusherEvent.ChatMessage.Event)
-        {
-            await producerService.SendMessage(data);
-        }
-        else if (pusherEvent == PusherEvent.Pong.Event)
-        {
-            Console.WriteLine("PONG");
-        }
-        else if (pusherEvent == PusherEvent.Connected.Event)
-        {
-            Console.WriteLine("Connected...");
-        }
-        else if (pusherEvent == PusherEvent.Subscribed.Event)
-        {
-            Console.WriteLine("Listening...");
         }
     }
 }
