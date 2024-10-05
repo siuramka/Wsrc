@@ -19,21 +19,20 @@ public class Program
         builder.Services.Configure<RabbitMqConfiguration>(configuration.GetSection(RabbitMqConfiguration.Section));
         builder.Services.Configure<KickConfiguration>(configuration.GetSection(KickConfiguration.Section));
 
-        //todo fix lifetimes
-
-        builder.Services.AddSingleton<IKickEventStrategyHandler, KickEventStrategyHandler>();
-        builder.Services.AddSingleton<IKickEventStrategy, ChatMessageEvent>();
-        builder.Services.AddSingleton<IKickEventStrategy, ConnectedEvent>();
-        builder.Services.AddSingleton<IKickEventStrategy, PongEvent>();
-        builder.Services.AddSingleton<IKickEventStrategy, SubscribedEvent>();
-
-        //singleton
+        builder.Services.AddSingleton<IKickPusherClientFactory, KickPusherClientFactory>();
         builder.Services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
         builder.Services.AddSingleton<IProducerService, RabbitMqProducer>();
-
-        builder.Services.AddSingleton<IKickPusherClientFactory, KickPusherClientFactory>();
-        builder.Services.AddSingleton<IKickPusherClientManager, KickPusherClientManager>();
         builder.Services.AddSingleton<IKickProducerFacede, KickProducerFacade>();
+        builder.Services.AddSingleton<IKickPusherClientManager, KickPusherClientManager>();
+
+        builder.Services.AddTransient<IKickEventStrategy, ChatMessageEvent>();
+        builder.Services.AddTransient<IKickEventStrategy, ConnectedEvent>();
+        builder.Services.AddTransient<IKickEventStrategy, PongEvent>();
+        builder.Services.AddTransient<IKickEventStrategy, SubscribedEvent>();
+
+        builder.Services.AddTransient<IKickEventStrategyHandler, KickEventStrategyHandler>();
+
+        builder.Services.AddScoped<IKickChatChannelMessageProcessor, KickChatChannelMessageProcessor>();
 
         builder.Services.AddHostedService<ProducerWorkerService>();
 
