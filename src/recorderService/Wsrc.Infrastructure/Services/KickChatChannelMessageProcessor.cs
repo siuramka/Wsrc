@@ -2,7 +2,6 @@ using System.Text;
 using System.Text.Json;
 using Wsrc.Core.Interfaces;
 using Wsrc.Domain;
-using Wsrc.Infrastructure.Interfaces;
 
 namespace Wsrc.Infrastructure.Services;
 

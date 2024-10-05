@@ -1,8 +1,5 @@
-using System.Text;
-using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Wsrc.Core.Interfaces;
-using Wsrc.Domain;
 
 namespace Wsrc.Core.Services.Kick;
 

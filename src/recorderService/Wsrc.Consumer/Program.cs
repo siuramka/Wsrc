@@ -12,6 +12,7 @@ public class Program
         var builder = Host.CreateApplicationBuilder(args);
 
         var configuration = builder.Configuration;
+
         builder.Services.Configure<RabbitMqConfiguration>(configuration.GetSection(RabbitMqConfiguration.Section));
         builder.Services.Configure<KickConfiguration>(configuration.GetSection(KickConfiguration.Section));
 
