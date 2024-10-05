@@ -8,6 +8,7 @@ namespace Wsrc.Infrastructure.Services;
 
 public class RabbitMqProducer(IRabbitMqClient rabbitMqClient) : IProducerService
 {
+    public Guid Id { get; set; } = Guid.NewGuid();
     public async Task SendMessage(string message)
     {
         using var connection = await rabbitMqClient.CreateConnectionAsync();
