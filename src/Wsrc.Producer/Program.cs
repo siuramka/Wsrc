@@ -10,6 +10,9 @@ namespace Wsrc.Producer;
 
 public class Program
 {
+    //TODO: add cancellation tokens
+    // handle websocket drop connection
+    // handle pusher drop/unsubscribe/etc connection
     public static void Main(string[] args)
     {
         var builder = Host.CreateApplicationBuilder(args);

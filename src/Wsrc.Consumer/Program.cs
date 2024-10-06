@@ -7,6 +7,9 @@ namespace Wsrc.Consumer;
 
 public class Program
 {
+    // todo
+    // consume and parse messages
+    // batch insert into db
     public static void Main(string[] args)
     {
         var builder = Host.CreateApplicationBuilder(args);

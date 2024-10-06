@@ -20,7 +20,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Wsrc.Domain\Wsrc.Domain.csproj"/>
-        <ProjectReference Include="..\Wsrc.Infrastructure\Wsrc.Infrastructure.csproj"/>
+      <ProjectReference Include="..\Wsrc.Core\Wsrc.Core.csproj" />
+      <ProjectReference Include="..\Wsrc.Domain\Wsrc.Domain.csproj" />
+      <ProjectReference Include="..\Wsrc.Infrastructure\Wsrc.Infrastructure.csproj" />
     </ItemGroup>
 </Project>
