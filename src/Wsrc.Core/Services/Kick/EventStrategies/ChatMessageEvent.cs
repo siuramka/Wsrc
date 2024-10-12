@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Wsrc.Core.Interfaces;
 using Wsrc.Domain;
 
@@ -10,8 +11,8 @@ public class ChatMessageEvent(IProducerService producerService) : IKickEventStra
         return pusherEvent.Event == PusherEvent.ChatMessage.Event;
     }
 
-    public async Task ExecuteAsync(string messageData)
+    public async Task ExecuteAsync(string data)
     {
-        await producerService.SendMessage(messageData);
+        await producerService.SendMessage(data);
     }
 }

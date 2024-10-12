@@ -11,7 +11,14 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0-rc.2.24474.1" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0-rc.2.24473.5" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="RabbitMQ.Client">
+        <HintPath>..\..\..\..\.nuget\packages\rabbitmq.client\7.0.0-rc.11\lib\net6.0\RabbitMQ.Client.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

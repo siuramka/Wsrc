@@ -3,6 +3,7 @@ using Wsrc.Core.Services.Kick;
 using Wsrc.Core.Services.Kick.EventStrategies;
 using Wsrc.Infrastructure.Configuration;
 using Wsrc.Infrastructure.Interfaces;
+using Wsrc.Infrastructure.Messaging;
 using Wsrc.Infrastructure.Services;
 using Wsrc.Producer.Services;
 

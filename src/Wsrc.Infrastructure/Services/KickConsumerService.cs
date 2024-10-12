@@ -7,7 +7,9 @@ using Wsrc.Infrastructure.Interfaces;
 
 namespace Wsrc.Infrastructure.Services;
 
-public class KickConsumerService(IRabbitMqClient rabbitMqClient) : IConsumerService, IAsyncDisposable
+public class KickConsumerService(
+    IRabbitMqClient rabbitMqClient,
+    IKickChatChannelMessageConsumerProcessor messageConsumerProcessor) : IConsumerService, IAsyncDisposable
 {
     private IChannel _channel;
     private IConnection _connection;
@@ -26,14 +28,17 @@ public class KickConsumerService(IRabbitMqClient rabbitMqClient) : IConsumerServ
     {
         var consumer = new AsyncEventingBasicConsumer(_channel);
         consumer.Received += OnConsumerOnReceived;
+
         await _channel.BasicConsumeAsync(Queues.Wsrc, false, consumer);
     }
 
     private async Task OnConsumerOnReceived(object ch, BasicDeliverEventArgs ea)
     {
         var body = ea.Body.ToArray();
-        var text = Encoding.UTF8.GetString(body);
-        Console.WriteLine(text);
+        var messageString = Encoding.UTF8.GetString(body);
+
+        await messageConsumerProcessor.ConsumeAsync(messageString);
+
         await _channel.BasicAckAsync(ea.DeliveryTag, false);
     }
 

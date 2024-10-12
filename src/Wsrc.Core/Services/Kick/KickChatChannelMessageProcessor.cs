@@ -3,7 +3,7 @@ using System.Text.Json;
 using Wsrc.Core.Interfaces;
 using Wsrc.Domain;
 
-namespace Wsrc.Infrastructure.Services;
+namespace Wsrc.Core.Services.Kick;
 
 public class KickChatChannelMessageProcessor(IKickEventStrategyHandler eventStrategyHandler)
     : IKickChatChannelMessageProcessor
@@ -27,6 +27,7 @@ public class KickChatChannelMessageProcessor(IKickEventStrategyHandler eventStra
             var pusherEvent = PusherEvent.Parse(kickEvent.Event);
 
             var handler = eventStrategyHandler.GetStrategy(pusherEvent) ?? throw new InvalidOperationException();
+
             await handler.ExecuteAsync(data);
 
             ms.SetLength(0);

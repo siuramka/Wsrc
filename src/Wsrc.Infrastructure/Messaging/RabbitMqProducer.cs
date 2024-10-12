@@ -4,7 +4,7 @@ using Wsrc.Core.Interfaces;
 using Wsrc.Infrastructure.Constants;
 using Wsrc.Infrastructure.Interfaces;
 
-namespace Wsrc.Infrastructure.Services;
+namespace Wsrc.Infrastructure.Messaging;
 
 public class RabbitMqProducer(IRabbitMqClient rabbitMqClient) : IProducerService
 {

@@ -1,12 +1,12 @@
 using System.Text.Json.Serialization;
 
-namespace Wsrc.Domain;
+namespace Wsrc.Domain.Models;
 
 public class KickChatMessageChatInfo
 {
     [JsonPropertyName("id")] public Guid Id { get; set; }
 
-    [JsonPropertyName("chatroom_id")] public long ChatroomId { get; set; }
+    [JsonPropertyName("chatroom_id")] public int ChatroomId { get; set; }
 
     [JsonPropertyName("content")] public string Content { get; set; }
 

@@ -14,7 +14,7 @@ public class KickProducerFacade(
 
         foreach (var kickPusherClient in clientManager.ActiveConnections)
         {
-            _ = Task.Run(() => StartProcessing(kickPusherClient));
+            _ = StartProcessing(kickPusherClient);
         }
     }
 

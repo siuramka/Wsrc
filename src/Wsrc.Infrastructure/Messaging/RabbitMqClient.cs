@@ -3,7 +3,7 @@ using RabbitMQ.Client;
 using Wsrc.Infrastructure.Configuration;
 using Wsrc.Infrastructure.Interfaces;
 
-namespace Wsrc.Infrastructure.Services;
+namespace Wsrc.Infrastructure.Messaging;
 
 public class RabbitMqClient(IOptions<RabbitMqConfiguration> options) : IRabbitMqClient
 {
