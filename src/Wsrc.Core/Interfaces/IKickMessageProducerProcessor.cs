@@ -1,6 +1,6 @@
 namespace Wsrc.Core.Interfaces;
 
-public interface IKickChatChannelMessageProcessor
+public interface IKickMessageProducerProcessor
 {
     public Task ProcessChannelMessagesAsync(IKickPusherClient kickPusherClient);
 }

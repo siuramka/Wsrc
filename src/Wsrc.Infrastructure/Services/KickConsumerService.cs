@@ -9,7 +9,7 @@ namespace Wsrc.Infrastructure.Services;
 
 public class KickConsumerService(
     IRabbitMqClient rabbitMqClient,
-    IKickChatChannelMessageConsumerProcessor messageConsumerProcessor) : IConsumerService, IAsyncDisposable
+    IKickConsumerMessageProcessor messageConsumerMessageProcessor) : IConsumerService, IAsyncDisposable
 {
     private IChannel _channel;
     private IConnection _connection;
@@ -37,7 +37,7 @@ public class KickConsumerService(
         var body = ea.Body.ToArray();
         var messageString = Encoding.UTF8.GetString(body);
 
-        await messageConsumerProcessor.ConsumeAsync(messageString);
+        await messageConsumerMessageProcessor.ConsumeAsync(messageString);
 
         await _channel.BasicAckAsync(ea.DeliveryTag, false);
     }

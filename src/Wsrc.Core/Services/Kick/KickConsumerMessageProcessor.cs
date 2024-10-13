@@ -9,8 +9,8 @@ using Wsrc.Domain.Models;
 
 namespace Wsrc.Core.Services.Kick;
 
-public class KickChatChannelMessageConsumerProcessor(IServiceScopeFactory serviceScopeFactory)
-    : IKickChatChannelMessageConsumerProcessor
+public class KickConsumerMessageProcessor(IServiceScopeFactory serviceScopeFactory)
+    : IKickConsumerMessageProcessor
 {
     private const int MessageBatchSize = 10;
     private List<Message> _messageBatch = [];
@@ -68,6 +68,7 @@ public class KickChatChannelMessageConsumerProcessor(IServiceScopeFactory servic
                 await chatroomRepository.AddAsync(newChatroom);
             }
 
+            // TODO: tracking borken
             var sender = await senderRepository
                 .FirstOrDefaultAsync(x => x.Id == kickChatMessage.Data.KickChatMessageSender.Id);
 

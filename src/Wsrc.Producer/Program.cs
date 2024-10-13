@@ -36,7 +36,7 @@ public class Program
 
         builder.Services.AddTransient<IKickEventStrategyHandler, KickEventStrategyHandler>();
 
-        builder.Services.AddScoped<IKickChatChannelMessageProcessor, KickChatChannelMessageProcessor>();
+        builder.Services.AddScoped<IKickMessageProducerProcessor, KickProducerMessageProcessor>();
 
         builder.Services.AddHostedService<ProducerWorkerService>();
 

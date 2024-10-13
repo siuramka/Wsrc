@@ -5,8 +5,8 @@ using Wsrc.Domain;
 
 namespace Wsrc.Core.Services.Kick;
 
-public class KickChatChannelMessageProcessor(IKickEventStrategyHandler eventStrategyHandler)
-    : IKickChatChannelMessageProcessor
+public class KickProducerMessageProcessor(IKickEventStrategyHandler eventStrategyHandler)
+    : IKickMessageProducerProcessor
 {
     public async Task ProcessChannelMessagesAsync(IKickPusherClient kickPusherClient)
     {

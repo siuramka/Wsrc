@@ -21,7 +21,7 @@ public class KickProducerFacade(
     private async Task StartProcessing(IKickPusherClient kickPusherClient)
     {
         using var scope = serviceScopeFactory.CreateScope();
-        var messageProcessor = scope.ServiceProvider.GetService<IKickChatChannelMessageProcessor>()
+        var messageProcessor = scope.ServiceProvider.GetService<IKickMessageProducerProcessor>()
                                ?? throw new NullReferenceException();
         await messageProcessor.ProcessChannelMessagesAsync(kickPusherClient);
     }
