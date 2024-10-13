@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Wsrc.Domain;
 
-public class KickChatConnectionRequest(string chatroomId, PusherEvent pusherEvent)
+public class KickChatConnectionRequest(int chatroomId, PusherEvent pusherEvent)
 {
     [JsonPropertyName("event")] public string Event { get; } = pusherEvent.Event;
 

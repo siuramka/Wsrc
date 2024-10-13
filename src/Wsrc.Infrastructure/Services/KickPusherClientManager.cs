@@ -11,14 +11,16 @@ public class KickPusherClientManager(
 {
     public List<IKickPusherClient> ActiveConnections { get; } = [];
 
-    public async Task Launch()
+    public Task Launch()
     {
         var kickPusherClients = pusherClientFactory.CreateClients(kick.Value.Channels);
 
         foreach (var kickPusherClient in kickPusherClients)
         {
-            await Task.Run(() => CreateConnection(kickPusherClient));
+            _ = CreateConnection(kickPusherClient);
         }
+
+        return Task.CompletedTask;
     }
 
     private async Task CreateConnection(IKickPusherClient kickPusherClient)
@@ -34,7 +36,7 @@ public class KickPusherClientManager(
         ActiveConnections.Add(kickPusherClient);
     }
 
-    public IKickPusherClient GetClient(string channelId)
+    public IKickPusherClient GetClient(int channelId)
     {
         return ActiveConnections.First(c => c.ChannelId == channelId);
     }

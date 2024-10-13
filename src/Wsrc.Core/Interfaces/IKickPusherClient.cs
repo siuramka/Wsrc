@@ -7,7 +7,7 @@ public interface IKickPusherClient
 {
     public string ChannelName { get; init; }
 
-    public string ChannelId { get; init; }
+    public int ChannelId { get; init; }
 
     Task ConnectAsync();
 

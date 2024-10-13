@@ -10,8 +10,9 @@ public class SubscribedEvent : IKickEventStrategy
         return pusherEvent.Event == PusherEvent.Subscribed.Event;
     }
 
-    public async Task ExecuteAsync(string data)
+    public Task ExecuteAsync(string data)
     {
         Console.WriteLine("Subscribed");
+        return Task.CompletedTask;
     }
 }

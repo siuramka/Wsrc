@@ -36,6 +36,7 @@ public class Program
         builder.Services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
 
         builder.Services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
+        builder.Services.AddSingleton<IKickMessageSavingService, KickChatMessageBatchSavingService>();
         builder.Services.AddSingleton<IKickConsumerMessageProcessor, KickConsumerMessageProcessor>();
         builder.Services.AddSingleton<IConsumerService, KickConsumerService>();
 

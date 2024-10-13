@@ -10,8 +10,9 @@ public class ConnectedEvent : IKickEventStrategy
         return pusherEvent.Event == PusherEvent.Connected.Event;
     }
 
-    public async Task ExecuteAsync(string data)
+    public Task ExecuteAsync(string data)
     {
         Console.WriteLine("Connected");
+        return Task.CompletedTask;
     }
 }

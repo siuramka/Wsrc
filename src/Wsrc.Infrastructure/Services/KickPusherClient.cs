@@ -16,7 +16,7 @@ public class KickPusherClient(
 
     public string ChannelName { get; init; }
 
-    public string ChannelId { get; init; }
+    public int ChannelId { get; init; }
 
     public async Task ConnectAsync()
     {

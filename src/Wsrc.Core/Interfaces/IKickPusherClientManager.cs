@@ -4,7 +4,7 @@ public interface IKickPusherClientManager
 {
     public List<IKickPusherClient> ActiveConnections { get; }
 
-    public IKickPusherClient GetClient(string channelId);
+    public IKickPusherClient GetClient(int channelId);
 
     public Task Launch();
 }
