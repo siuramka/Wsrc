@@ -4,15 +4,15 @@ using Wsrc.Domain.Models.Chatrooms;
 
 namespace Wsrc.Api.Business.Filters.Validations.Filters;
 
-public class ChatroomSearchDtoValidationFilter(ValidationUtilities validationUtilities)
+public class ChatroomGetAllParametersValidationFilter(ValidationUtilities validationUtilities)
     : IEndpointFilter,
-        IParametersValidationFilter<ChatroomSearchDto>
+        IParametersValidationFilter<ChatroomGetAllParameters>
 {
     public async ValueTask<object?> InvokeAsync(
         EndpointFilterInvocationContext context,
         EndpointFilterDelegate next)
     {
-        var chatroomSearchDto = context.GetArgument<ChatroomSearchDto>(0);
+        var chatroomSearchDto = context.GetArgument<ChatroomGetAllParameters>(0);
 
         var validationErrors = GetValidationErrors(chatroomSearchDto);
 
@@ -24,18 +24,16 @@ public class ChatroomSearchDtoValidationFilter(ValidationUtilities validationUti
         return await next(context);
     }
 
-    public string GetValidationErrors(ChatroomSearchDto chatroom)
+    public string GetValidationErrors(ChatroomGetAllParameters parameters)
     {
-        if (chatroom.Username is null)
+        if (parameters.Username is null)
         {
             return string.Empty;
         }
 
         var maxLengthError = validationUtilities
-            .MaxLength(chatroom.Username, nameof(chatroom.Username), ValidationConstants.MaxNameLength);
-
-        var errors = new List<string?> { maxLengthError };
-
-        return validationUtilities.GetErrors(errors);
+            .MaxLength(parameters.Username, nameof(parameters.Username), ValidationConstants.MaxNameLength);
+        
+        return validationUtilities.GetErrors([maxLengthError]);
     }
 }

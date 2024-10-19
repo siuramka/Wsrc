@@ -11,14 +11,14 @@ public static class ChatroomEndpoints
     public static void RegisterEndpoints(RouteGroupBuilder routeBuilder)
     {
         routeBuilder.MapGet("/chatrooms", GetAll)
-            .AddEndpointFilter<ChatroomSearchDtoValidationFilter>();
+            .AddEndpointFilter<ChatroomGetAllParametersValidationFilter>();
     }
 
     public static async Task<Ok<IEnumerable<ChatroomDto>>> GetAll(
-        [AsParameters] ChatroomSearchDto chatroomSearchDto,
+        [AsParameters] ChatroomGetAllParameters chatroomGetAllParameters,
         [FromServices] ChatroomService chatroomService)
     {
-        var chatroomsDto = await chatroomService.GetAllAsync(chatroomSearchDto.Username);
+        var chatroomsDto = await chatroomService.GetAllAsync(chatroomGetAllParameters.Username);
 
         return TypedResults.Ok(chatroomsDto);
     }

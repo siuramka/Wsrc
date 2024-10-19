@@ -18,6 +18,8 @@ public class Program
 
         builder.Services.AddScoped<ChatroomRepository>();
         builder.Services.AddScoped<ChatroomService>();
+        builder.Services.AddScoped<MessageService>();
+        builder.Services.AddScoped<MessageRepository>();
         builder.Services.AddSingleton<ValidationUtilities>();
 
         var app = builder.Build();

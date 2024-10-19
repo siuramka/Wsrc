@@ -20,7 +20,6 @@ public class ValidationUtilities
     {
         return errors
             .Where(e => e is not null)
-            .Select(e => e + "\n")
-            .Aggregate(string.Empty, (acc, e) => acc + e);
+            .Aggregate(string.Empty, (acc, e) => acc + e + " ");
     }
 }
