@@ -1,20 +1,24 @@
 using Microsoft.EntityFrameworkCore;
+using Wsrc.Api.Business.Services.Mappings;
 using Wsrc.Domain;
+using Wsrc.Domain.Models.Chatrooms;
 using Wsrc.Domain.Repositories;
 
 namespace Wsrc.Api.Business.Services;
 
 public class ChatroomService(WsrcDbContext dbContext)
 {
-    public async Task<IEnumerable<Chatroom>> GetAllAsync(string channelName)
+    public async Task<IEnumerable<ChatroomDto>> GetAllAsync(string channelName)
     {
-        if (string.IsNullOrWhiteSpace(channelName))
+        var chatroomsQuery = dbContext.Chatrooms.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(channelName))
         {
-            return await dbContext.Chatrooms.ToListAsync();
+            chatroomsQuery = chatroomsQuery.Where(c => EF.Functions.Like(c.Username, $"%{channelName}%"));
         }
 
-        return await dbContext.Chatrooms
-            .Where(c => c.Username.Contains(channelName.ToLower()))
-            .ToListAsync();
+        var chatrooms = await chatroomsQuery.ToListAsync();
+
+        return ChatroomMapper.ToDtoList(chatrooms);
     }
 }

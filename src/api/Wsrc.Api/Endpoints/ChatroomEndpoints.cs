@@ -20,8 +20,8 @@ public static class ChatroomEndpoints
         [AsParameters] ChatroomSearchDto chatroomSearchDto,
         [FromServices] ChatroomService chatroomService)
     {
-        var chatrooms = await chatroomService.GetAllAsync(chatroomSearchDto.Username);
+        var chatroomsDto = await chatroomService.GetAllAsync(chatroomSearchDto.Username);
 
-        return TypedResults.Ok(ChatroomMapper.ToDtoList(chatrooms));
+        return TypedResults.Ok(chatroomsDto);
     }
 }
