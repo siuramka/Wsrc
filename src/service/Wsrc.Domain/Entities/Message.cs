@@ -8,7 +8,7 @@ public class Message : EntityBase
 
     public Chatroom Chatroom { get; set; } = null!;
     
-    public string Content { get; set; } = string.Empty;
+    public string Content { get; set; } = null!;
     
     public DateTime Timestamp { get; set; }
     
