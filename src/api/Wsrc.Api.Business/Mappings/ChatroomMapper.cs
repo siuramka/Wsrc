@@ -1,7 +1,7 @@
 using Wsrc.Domain;
 using Wsrc.Domain.Models.Chatrooms;
 
-namespace Wsrc.Api.Business.Services.Mappings;
+namespace Wsrc.Api.Business.Mappings;
 
 public static class ChatroomMapper
 {

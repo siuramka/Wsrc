@@ -2,5 +2,5 @@ namespace Wsrc.Domain.Models.Chatrooms;
 
 public class ChatroomSearchDto
 {
-    public string Username { get; set; } = string.Empty;
+    public string? Username { get; set; }
 }

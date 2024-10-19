@@ -4,9 +4,9 @@ using Wsrc.Domain.Models.Chatrooms;
 
 namespace Wsrc.Api.Business.Filters.Validations.Filters;
 
-public class ChatroomValidationParameterFilter(ValidationUtilities validationUtilities) 
+public class ChatroomSearchDtoValidationFilter(ValidationUtilities validationUtilities)
     : IEndpointFilter,
-    IParameterFilter<ChatroomSearchDto>
+        IParametersValidationFilter<ChatroomSearchDto>
 {
     public async ValueTask<object?> InvokeAsync(
         EndpointFilterInvocationContext context,
@@ -26,13 +26,15 @@ public class ChatroomValidationParameterFilter(ValidationUtilities validationUti
 
     public string GetValidationErrors(ChatroomSearchDto chatroom)
     {
-        var requiredError = validationUtilities
-            .Required(chatroom.Username, nameof(chatroom.Username));
+        if (chatroom.Username is null)
+        {
+            return string.Empty;
+        }
 
         var maxLengthError = validationUtilities
             .MaxLength(chatroom.Username, nameof(chatroom.Username), ValidationConstants.MaxNameLength);
 
-        var errors = new List<string?> { requiredError, maxLengthError };
+        var errors = new List<string?> { maxLengthError };
 
         return validationUtilities.GetErrors(errors);
     }

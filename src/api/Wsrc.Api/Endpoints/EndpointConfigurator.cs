@@ -4,6 +4,7 @@ public class EndpointConfigurator
 {
     public static void Configure(WebApplication app)
     {
-        ChatroomEndpoints.RegisterEndpoints(app);
+        var apiGroup = app.MapGroup("/api/v1");
+        ChatroomEndpoints.RegisterEndpoints(apiGroup);
     }
 }

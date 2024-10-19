@@ -1,6 +1,6 @@
 namespace Wsrc.Api.Business.Interfaces;
 
-public interface IParameterFilter<T>
+public interface IParametersValidationFilter<T>
 {
     public string GetValidationErrors(T entity);
 }
