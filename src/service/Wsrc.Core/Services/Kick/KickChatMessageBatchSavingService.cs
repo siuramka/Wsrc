@@ -38,7 +38,6 @@ public class KickChatMessageBatchSavingService(
         }
 
         var newSender = kickChatMessageMapper.ToSender(kickChatMessage);
-
         await senderRepository.AddAsync(newSender);
     }
 

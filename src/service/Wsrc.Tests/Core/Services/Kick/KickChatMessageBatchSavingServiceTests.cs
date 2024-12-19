@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Linq.Expressions;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Wsrc.Core.Interfaces.Mappings;
@@ -45,6 +46,84 @@ public class KickChatMessageBatchSavingServiceTests
     public void TearDown()
     {
         _serviceScope.Dispose();
+    }
+
+    [Test]
+    public async Task HandleMessageAsync_CreatesSender_WhenSenderDoesntExist()
+    {
+        // Arrange
+        var kickChatMessage = new KickChatMessage
+        {
+            Data = new KickChatMessageChatInfo
+            {
+                ChatroomId = 1,
+                Content = "Hello, World!",
+                CreatedAt = DateTime.UtcNow,
+                KickChatMessageSender = new KickChatMessageSender
+                {
+                    Id = 1,
+                    Username = "User1",
+                    Slug = "user1",
+                },
+            },
+        };
+
+        var sender = new Sender
+        {
+            Id = 1,
+            Username = "User1",
+            Slug = "user1",
+        };
+
+        _kickChatMessageMapper.ToSender(kickChatMessage).Returns(sender);
+
+        // Act
+        await _service.HandleMessageAsync(kickChatMessage);
+
+        // Assert
+        await _senderRepository
+            .Received()
+            .AddAsync(sender);
+    }
+
+    [Test]
+    public async Task HandleMessageAsync_DoesntCreateSender_WhenSenderExists()
+    {
+        // Arrange
+        var kickChatMessage = new KickChatMessage
+        {
+            Data = new KickChatMessageChatInfo
+            {
+                ChatroomId = 1,
+                Content = "Hello, World!",
+                CreatedAt = DateTime.UtcNow,
+                KickChatMessageSender = new KickChatMessageSender
+                {
+                    Id = 1,
+                    Username = "User1",
+                    Slug = "user1",
+                },
+            },
+        };
+
+        var sender = new Sender
+        {
+            Id = 1,
+            Username = "User1",
+            Slug = "user1",
+        };
+
+        _senderRepository
+            .FirstOrDefaultAsync(Arg.Any<Expression<Func<Sender, bool>>>())
+            .Returns(sender);
+
+        // Act
+        await _service.HandleMessageAsync(kickChatMessage);
+
+        // Assert
+        await _senderRepository
+            .DidNotReceive()
+            .AddAsync(Arg.Any<Sender>());
     }
 
     [Test]
