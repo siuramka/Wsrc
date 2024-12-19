@@ -70,7 +70,7 @@ public class KickChatMessageBatchSavingServiceTests
         var message = new Message
         {
             ChatroomId = 1,
-            Content = "Hello, World!",
+            Content = "Hello, World",
             Timestamp = DateTime.UtcNow,
             SenderId = 1,
         };
