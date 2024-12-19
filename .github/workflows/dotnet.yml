@@ -1,17 +1,13 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
-name: .NET
+name: Wsrc Actions
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    paths:
+      - 'src/service/**'
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -19,10 +15,10 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: 9.0.x
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore src/service/Wsrc.sln
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build src/service/Wsrc.sln --no-restore 
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test src/service/Wsrc.sln --no-build --verbosity normal
