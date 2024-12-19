@@ -32,7 +32,7 @@ public class Program
             var dbConfig = serviceProvider.GetRequiredService<IOptions<DatabaseConfiguration>>().Value;
             options.UseNpgsql(dbConfig.PostgresEfCoreConnectionString);
         });
-        
+
         builder.Services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
 
         builder.Services.AddSingleton<IRabbitMqClient, RabbitMqClient>();

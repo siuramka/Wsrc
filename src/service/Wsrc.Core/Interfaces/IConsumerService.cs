@@ -4,5 +4,5 @@ public interface IConsumerService
 {
     Task ConnectAsync();
 
-    Task ReadMessages();
+    Task ConsumeMessagesAsync();
 }

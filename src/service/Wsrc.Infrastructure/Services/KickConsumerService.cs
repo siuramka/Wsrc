@@ -9,7 +9,8 @@ namespace Wsrc.Infrastructure.Services;
 
 public class KickConsumerService(
     IRabbitMqClient rabbitMqClient,
-    IKickConsumerMessageProcessor messageConsumerMessageProcessor) : IConsumerService, IAsyncDisposable
+    IKickConsumerMessageProcessor messageConsumerMessageProcessor)
+    : IConsumerService, IAsyncDisposable
 {
     private IChannel _channel;
     private IConnection _connection;
@@ -19,20 +20,25 @@ public class KickConsumerService(
         _connection = await rabbitMqClient.CreateConnectionAsync();
         _channel = await _connection.CreateChannelAsync();
 
-        await _channel.QueueDeclareAsync(Queues.Wsrc, true, false, false);
-        await _channel.ExchangeDeclareAsync(Exchanges.Wsrc, ExchangeType.Fanout, true, false);
-        await _channel.QueueBindAsync(Queues.Wsrc, Exchanges.Wsrc, string.Empty);
+        await SetupQueueAsync();
     }
 
-    public async Task ReadMessages()
+    private async Task SetupQueueAsync()
+    {
+        await _channel.QueueDeclareAsync(Queues.Wsrc, durable: true, exclusive: false, autoDelete: false);
+        await _channel.ExchangeDeclareAsync(Exchanges.Wsrc, ExchangeType.Fanout, durable: true, autoDelete: false);
+        await _channel.QueueBindAsync(Queues.Wsrc, exchange: Exchanges.Wsrc, string.Empty);
+    }
+
+    public async Task ConsumeMessagesAsync()
     {
         var consumer = new AsyncEventingBasicConsumer(_channel);
-        consumer.Received += OnConsumerOnReceived;
+        consumer.ReceivedAsync += OnConsumerOnReceivedAsync;
 
         await _channel.BasicConsumeAsync(Queues.Wsrc, false, consumer);
     }
 
-    private async Task OnConsumerOnReceived(object ch, BasicDeliverEventArgs ea)
+    private async Task OnConsumerOnReceivedAsync(object ch, BasicDeliverEventArgs ea)
     {
         var body = ea.Body.ToArray();
         var messageString = Encoding.UTF8.GetString(body);

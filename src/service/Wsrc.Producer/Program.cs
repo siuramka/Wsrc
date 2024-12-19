@@ -16,9 +16,11 @@ namespace Wsrc.Producer;
 
 public class Program
 {
-    //TODO: add cancellation tokens
+    // add cancellation tokens
     // handle websocket drop connection
     // handle pusher drop/unsubscribe/etc connection
+    // add tests
+    // add prometheus metrics
     public static void Main(string[] args)
     {
         var builder = Host.CreateApplicationBuilder(args);
@@ -28,13 +30,13 @@ public class Program
         builder.Services.Configure<RabbitMqConfiguration>(configuration.GetSection(RabbitMqConfiguration.Section));
         builder.Services.Configure<KickConfiguration>(configuration.GetSection(KickConfiguration.Section));
         builder.Services.Configure<DatabaseConfiguration>(configuration.GetSection(DatabaseConfiguration.Section));
-        
+
         builder.Services.AddDbContext<WsrcContext>((serviceProvider, options) =>
         {
             var dbConfig = serviceProvider.GetRequiredService<IOptions<DatabaseConfiguration>>().Value;
             options.UseNpgsql(dbConfig.PostgresEfCoreConnectionString);
         });
-        
+
         builder.Services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
 
         builder.Services.AddSingleton<IKickPusherClientFactory, KickPusherClientFactory>();
@@ -42,7 +44,6 @@ public class Program
         builder.Services.AddSingleton<IProducerService, RabbitMqProducer>();
         builder.Services.AddSingleton<IKickProducerFacede, KickProducerFacade>();
         builder.Services.AddSingleton<IKickPusherClientManager, KickPusherClientManager>();
-        builder.Services.AddSingleton<IKickDataSeeder, KickDataSeeder>();
 
         builder.Services.AddTransient<IKickEventStrategy, ChatMessageEvent>();
         builder.Services.AddTransient<IKickEventStrategy, ConnectedEvent>();

@@ -1,47 +1,45 @@
+using System.Collections.Concurrent;
 using Microsoft.Extensions.DependencyInjection;
 using Wsrc.Core.Interfaces;
+using Wsrc.Core.Interfaces.Mappings;
 using Wsrc.Core.Interfaces.Repositories;
 using Wsrc.Domain;
 using Wsrc.Domain.Entities;
 
 namespace Wsrc.Core.Services.Kick;
 
-public class KickChatMessageBatchSavingService(IServiceScopeFactory serviceScopeFactory) : IKickMessageSavingService
+public class KickChatMessageBatchSavingService(
+    IServiceScopeFactory serviceScopeFactory,
+    IKickChatMessageMapper kickChatMessageMapper) : IKickMessageSavingService
 {
     private const int MessageBatchSize = 100;
-    private readonly List<Message> _messageBatch = [];
+    private readonly ConcurrentQueue<Message> _messageBatch = [];
 
     public async Task HandleMessageAsync(KickChatMessage kickChatMessage)
     {
+        var message = kickChatMessageMapper.ToMessage(kickChatMessage);
+        _messageBatch.Enqueue(message);
+
+        await CreateSender(kickChatMessage);
+        await FlushBatchesAsync();
+    }
+
+    private async Task CreateSender(KickChatMessage kickChatMessage)
+    {
         using var scope = serviceScopeFactory.CreateScope();
+
         var senderRepository = scope.ServiceProvider.GetRequiredService<IAsyncRepository<Sender>>();
-
-        var message = new Message
-        {
-            ChatroomId = kickChatMessage.Data.ChatroomId,
-            Content = kickChatMessage.Data.Content,
-            Timestamp = kickChatMessage.Data.CreatedAt.ToUniversalTime(),
-            SenderId = kickChatMessage.Data.KickChatMessageSender.Id,
-        };
-
-        _messageBatch.Add(message);
-
         var sender = await senderRepository
-            .FirstOrDefaultAsync(x => x.Id == kickChatMessage.Data.KickChatMessageSender.Id);
+            .FirstOrDefaultAsync(s => s.Id == kickChatMessage.Data.KickChatMessageSender.Id);
 
-        if (sender is null)
+        if (sender is not null)
         {
-            var newSender = new Sender
-            {
-                Id = kickChatMessage.Data.KickChatMessageSender.Id,
-                Username = kickChatMessage.Data.KickChatMessageSender.Username.ToLower(),
-                Slug = kickChatMessage.Data.KickChatMessageSender.Slug.ToLower(),
-            };
-
-            await senderRepository.AddAsync(newSender);
+            return;
         }
 
-        await FlushBatchesAsync();
+        var newSender = kickChatMessageMapper.ToSender(kickChatMessage);
+
+        await senderRepository.AddAsync(newSender);
     }
 
     private async Task FlushBatchesAsync()
@@ -54,7 +52,9 @@ public class KickChatMessageBatchSavingService(IServiceScopeFactory serviceScope
         using var scope = serviceScopeFactory.CreateScope();
         var messageRepository = scope.ServiceProvider.GetRequiredService<IAsyncRepository<Message>>();
 
-        await messageRepository.AddRangeAsync(_messageBatch);
+        var messages = new List<Message>(_messageBatch);
+
+        await messageRepository.AddRangeAsync(messages);
 
         _messageBatch.Clear();
     }

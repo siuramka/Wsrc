@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector" Version="6.0.2"/>
+        <PackageReference Include="FluentAssertions" Version="8.0.0-alpha.1" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1"/>
+        <PackageReference Include="NSubstitute" Version="5.3.0" />
+        <PackageReference Include="NUnit" Version="4.1.0"/>
+        <PackageReference Include="NUnit.Analyzers" Version="4.2.0"/>
+        <PackageReference Include="NUnit3TestAdapter" Version="4.6.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="NUnit.Framework"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Wsrc.Consumer\Wsrc.Consumer.csproj" />
+      <ProjectReference Include="..\Wsrc.Core\Wsrc.Core.csproj" />
+      <ProjectReference Include="..\Wsrc.Domain\Wsrc.Domain.csproj" />
+      <ProjectReference Include="..\Wsrc.Infrastructure\Wsrc.Infrastructure.csproj" />
+      <ProjectReference Include="..\Wsrc.Producer\Wsrc.Producer.csproj" />
+    </ItemGroup>
+
+</Project>
