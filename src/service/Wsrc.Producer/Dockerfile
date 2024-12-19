@@ -1,11 +1,14 @@
-﻿FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
+﻿FROM mcr.microsoft.com/dotnet/runtime:9.0 AS base
 USER $APP_UID
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Wsrc.Producer/Wsrc.Producer.csproj", "Wsrc.Producer/"]
+COPY ["Wsrc.Core/Wsrc.Core.csproj", "Wsrc.Core/"]
+COPY ["Wsrc.Domain/Wsrc.Domain.csproj", "Wsrc.Domain/"]
+COPY ["Wsrc.Infrastructure/Wsrc.Infrastructure.csproj", "Wsrc.Infrastructure/"]
 RUN dotnet restore "Wsrc.Producer/Wsrc.Producer.csproj"
 COPY . .
 WORKDIR "/src/Wsrc.Producer"
