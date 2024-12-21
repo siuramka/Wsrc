@@ -8,6 +8,7 @@ using Wsrc.Core.Services.Kick;
 using Wsrc.Domain;
 using Wsrc.Domain.Entities;
 using Wsrc.Domain.Models;
+using Wsrc.Tests.Reusables;
 
 namespace Wsrc.Tests.Core.Services.Kick;
 
@@ -19,7 +20,7 @@ public class KickChatMessageBatchSavingServiceTests
     private IServiceProvider _serviceProvider;
     private IAsyncRepository<Sender> _senderRepository;
     private IAsyncRepository<Message> _messageRepository;
-    private IKickChatMessageMapper _kickChatMessageMapper;
+    private IMapper _mapper;
 
     private KickChatMessageBatchSavingService _service;
 
@@ -31,7 +32,7 @@ public class KickChatMessageBatchSavingServiceTests
         _serviceProvider = Substitute.For<IServiceProvider>();
         _senderRepository = Substitute.For<IAsyncRepository<Sender>>();
         _messageRepository = Substitute.For<IAsyncRepository<Message>>();
-        _kickChatMessageMapper = Substitute.For<IKickChatMessageMapper>();
+        _mapper = new MapperMock().SetupMapper();
 
         _serviceScopeFactory.CreateScope().Returns(_serviceScope);
         _serviceScope.ServiceProvider.Returns(_serviceProvider);
@@ -39,7 +40,7 @@ public class KickChatMessageBatchSavingServiceTests
         _serviceProvider.GetService(typeof(IAsyncRepository<Message>)).Returns(_messageRepository);
         _serviceProvider.GetService(typeof(IAsyncRepository<Sender>)).Returns(_senderRepository);
 
-        _service = new KickChatMessageBatchSavingService(_serviceScopeFactory, _kickChatMessageMapper);
+        _service = new KickChatMessageBatchSavingService(_serviceScopeFactory, _mapper);
     }
 
     [TearDown]
@@ -75,7 +76,7 @@ public class KickChatMessageBatchSavingServiceTests
             Slug = "user1",
         };
 
-        _kickChatMessageMapper.ToSender(kickChatMessage).Returns(sender);
+        _mapper.KickChatMessageMapper.ToSender(kickChatMessage).Returns(sender);
 
         // Act
         await _service.HandleMessageAsync(kickChatMessage);
@@ -154,7 +155,7 @@ public class KickChatMessageBatchSavingServiceTests
             SenderId = 1,
         };
 
-        _kickChatMessageMapper.ToMessage(kickChatMessage).Returns(message);
+        _mapper.KickChatMessageMapper.ToMessage(kickChatMessage).Returns(message);
 
         // Act
         const int batchSize = 100;

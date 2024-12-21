@@ -1,0 +1,48 @@
+services:
+  wsrc.db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=WsrcDb
+    restart: always
+    ports:
+        - "5432:5432"
+    volumes:
+      - wsrc.db:/var/lib/postgresql/data/ 
+
+  messaging.rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: "wsrc-dev-user"
+      RABBITMQ_DEFAULT_PASS: "wsrc-dev-pwd"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  wsrc.consumer:
+    build:
+      context: ./service
+      dockerfile: Wsrc.Consumer/Dockerfile
+    environment:
+      - RABBITMQ__HOSTNAME=messaging.rabbitmq
+      - RABBITMQ__USERNAME=wsrc-dev-user
+      - RABBITMQ__PASSWORD=wsrc-dev-pwd
+      - DATABASE__POSTGRESEFCORECONNECTIONSTRING=Server=wsrc.db;Database=WsrcDb;User Id=postgres;Password=postgres;Encrypt=False;TrustServerCertificate=True
+    depends_on:
+      - wsrc.db
+      - messaging.rabbitmq
+
+  wsrc.producer:
+    build:
+      context: ./service
+      dockerfile: Wsrc.Producer/Dockerfile
+    environment:
+      - RABBITMQ__HOSTNAME=messaging.rabbitmq
+      - RABBITMQ__USERNAME=wsrc-dev-user
+      - RABBITMQ__PASSWORD=wsrc-dev-pwd
+      - DATABASE__POSTGRESEFCORECONNECTIONSTRING=Server=wsrc.db;Database=WsrcDb;User Id=postgres;Password=postgres;Encrypt=False;TrustServerCertificate=True
+      - KICK__PUSHERCONNECTIONSTRING=wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0-rc2&flash=false
+    depends_on:
+        - wsrc.db
+        - messaging.rabbitmq

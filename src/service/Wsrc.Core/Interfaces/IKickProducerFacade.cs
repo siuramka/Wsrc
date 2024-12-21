@@ -1,6 +1,6 @@
 namespace Wsrc.Core.Interfaces;
 
-public interface IKickProducerFacede
+public interface IKickProducerFacade
 {
     public Task HandleMessages();
 }

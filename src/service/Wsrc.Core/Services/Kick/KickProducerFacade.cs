@@ -6,7 +6,7 @@ namespace Wsrc.Core.Services.Kick;
 public class KickProducerFacade(
     IKickPusherClientManager clientManager,
     IServiceScopeFactory serviceScopeFactory)
-    : IKickProducerFacede
+    : IKickProducerFacade
 {
     public async Task HandleMessages()
     {
@@ -14,7 +14,7 @@ public class KickProducerFacade(
 
         foreach (var kickPusherClient in clientManager.ActiveConnections)
         {
-            _ = StartProcessing(kickPusherClient);
+            _ = Task.Run(() => StartProcessing(kickPusherClient));
         }
     }
 

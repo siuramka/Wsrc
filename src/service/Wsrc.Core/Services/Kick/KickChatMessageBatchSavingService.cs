@@ -10,21 +10,21 @@ namespace Wsrc.Core.Services.Kick;
 
 public class KickChatMessageBatchSavingService(
     IServiceScopeFactory serviceScopeFactory,
-    IKickChatMessageMapper kickChatMessageMapper) : IKickMessageSavingService
+    IMapper mapper) : IKickMessageSavingService
 {
     private const int MessageBatchSize = 100;
     private readonly ConcurrentQueue<Message> _messageBatch = [];
 
     public async Task HandleMessageAsync(KickChatMessage kickChatMessage)
     {
-        var message = kickChatMessageMapper.ToMessage(kickChatMessage);
+        var message = mapper.KickChatMessageMapper.ToMessage(kickChatMessage);
         _messageBatch.Enqueue(message);
 
-        await CreateSender(kickChatMessage);
+        await CreateSenderAsync(kickChatMessage);
         await FlushBatchesAsync();
     }
 
-    private async Task CreateSender(KickChatMessage kickChatMessage)
+    private async Task CreateSenderAsync(KickChatMessage kickChatMessage)
     {
         using var scope = serviceScopeFactory.CreateScope();
 
@@ -37,7 +37,7 @@ public class KickChatMessageBatchSavingService(
             return;
         }
 
-        var newSender = kickChatMessageMapper.ToSender(kickChatMessage);
+        var newSender = mapper.KickChatMessageMapper.ToSender(kickChatMessage);
         await senderRepository.AddAsync(newSender);
     }
 

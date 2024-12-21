@@ -27,6 +27,7 @@ public class Program
 
         var configuration = builder.Configuration;
 
+        builder.Configuration.AddEnvironmentVariables();
         builder.Services.Configure<RabbitMqConfiguration>(configuration.GetSection(RabbitMqConfiguration.Section));
         builder.Services.Configure<KickConfiguration>(configuration.GetSection(KickConfiguration.Section));
         builder.Services.Configure<DatabaseConfiguration>(configuration.GetSection(DatabaseConfiguration.Section));
@@ -42,14 +43,13 @@ public class Program
         builder.Services.AddSingleton<IKickPusherClientFactory, KickPusherClientFactory>();
         builder.Services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
         builder.Services.AddSingleton<IProducerService, RabbitMqProducer>();
-        builder.Services.AddSingleton<IKickProducerFacede, KickProducerFacade>();
+        builder.Services.AddSingleton<IKickProducerFacade, KickProducerFacade>();
         builder.Services.AddSingleton<IKickPusherClientManager, KickPusherClientManager>();
 
         builder.Services.AddTransient<IKickEventStrategy, ChatMessageEvent>();
         builder.Services.AddTransient<IKickEventStrategy, ConnectedEvent>();
         builder.Services.AddTransient<IKickEventStrategy, PongEvent>();
         builder.Services.AddTransient<IKickEventStrategy, SubscribedEvent>();
-
         builder.Services.AddTransient<IKickEventStrategyHandler, KickEventStrategyHandler>();
 
         builder.Services.AddScoped<IKickMessageProducerProcessor, KickProducerMessageProcessor>();
