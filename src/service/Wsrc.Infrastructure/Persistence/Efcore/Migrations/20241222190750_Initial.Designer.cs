@@ -12,7 +12,7 @@ using Wsrc.Infrastructure.Persistence;
 namespace Wsrc.Infrastructure.Persistence.Efcore.Migrations
 {
     [DbContext(typeof(WsrcContext))]
-    [Migration("20241012215422_Initial")]
+    [Migration("20241222190750_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -24,6 +24,23 @@ namespace Wsrc.Infrastructure.Persistence.Efcore.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("Wsrc.Domain.Entities.Channel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Channels");
+                });
 
             modelBuilder.Entity("Wsrc.Domain.Entities.Chatroom", b =>
                 {
@@ -96,13 +113,13 @@ namespace Wsrc.Infrastructure.Persistence.Efcore.Migrations
             modelBuilder.Entity("Wsrc.Domain.Entities.Message", b =>
                 {
                     b.HasOne("Wsrc.Domain.Entities.Chatroom", "Chatroom")
-                        .WithMany()
+                        .WithMany("Messages")
                         .HasForeignKey("ChatroomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Wsrc.Domain.Entities.Sender", "Sender")
-                        .WithMany()
+                        .WithMany("Messages")
                         .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -110,6 +127,16 @@ namespace Wsrc.Infrastructure.Persistence.Efcore.Migrations
                     b.Navigation("Chatroom");
 
                     b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("Wsrc.Domain.Entities.Chatroom", b =>
+                {
+                    b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("Wsrc.Domain.Entities.Sender", b =>
+                {
+                    b.Navigation("Messages");
                 });
 #pragma warning restore 612, 618
         }

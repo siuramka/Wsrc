@@ -110,13 +110,13 @@ namespace Wsrc.Infrastructure.Persistence.Efcore.Migrations
             modelBuilder.Entity("Wsrc.Domain.Entities.Message", b =>
                 {
                     b.HasOne("Wsrc.Domain.Entities.Chatroom", "Chatroom")
-                        .WithMany()
+                        .WithMany("Messages")
                         .HasForeignKey("ChatroomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Wsrc.Domain.Entities.Sender", "Sender")
-                        .WithMany()
+                        .WithMany("Messages")
                         .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -124,6 +124,16 @@ namespace Wsrc.Infrastructure.Persistence.Efcore.Migrations
                     b.Navigation("Chatroom");
 
                     b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("Wsrc.Domain.Entities.Chatroom", b =>
+                {
+                    b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("Wsrc.Domain.Entities.Sender", b =>
+                {
+                    b.Navigation("Messages");
                 });
 #pragma warning restore 612, 618
         }
