@@ -28,7 +28,7 @@ services:
       - RABBITMQ__HOSTNAME=messaging.rabbitmq
       - RABBITMQ__USERNAME=wsrc-dev-user
       - RABBITMQ__PASSWORD=wsrc-dev-pwd
-      - DATABASE__POSTGRESEFCORECONNECTIONSTRING=Server=wsrc.db;Database=WsrcDb;User Id=postgres;Password=postgres;Encrypt=False;TrustServerCertificate=True
+      - DATABASE__POSTGRESEFCORECONNECTIONSTRING=Server=wsrc.db;Database=WsrcDb;User Id=postgres;Password=postgres;TrustServerCertificate=True;IncludeErrorDetail=True
     depends_on:
       - wsrc.db
       - messaging.rabbitmq
@@ -41,7 +41,7 @@ services:
       - RABBITMQ__HOSTNAME=messaging.rabbitmq
       - RABBITMQ__USERNAME=wsrc-dev-user
       - RABBITMQ__PASSWORD=wsrc-dev-pwd
-      - DATABASE__POSTGRESEFCORECONNECTIONSTRING=Server=wsrc.db;Database=WsrcDb;User Id=postgres;Password=postgres;Encrypt=False;TrustServerCertificate=True
+      - DATABASE__POSTGRESEFCORECONNECTIONSTRING=Server=wsrc.db;Database=WsrcDb;User Id=postgres;Password=postgres;TrustServerCertificate=True;IncludeErrorDetail=True
       - KICK__PUSHERCONNECTIONSTRING=wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0-rc2&flash=false
     depends_on:
         - wsrc.db
