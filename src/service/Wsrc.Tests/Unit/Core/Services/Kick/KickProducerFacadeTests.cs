@@ -36,6 +36,9 @@ public class KickProducerFacadeTests
     [Test]
     public async Task HandleMessages_LaunchesClientManager()
     {
+        // Arrange
+        _kickPusherClientManager.ActiveConnections.Returns([]);
+
         // Act
         await _kickProducerFacade.HandleMessages();
 
