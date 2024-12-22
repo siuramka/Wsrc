@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Wsrc.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using Wsrc.Infrastructure.Persistence;
 namespace Wsrc.Infrastructure.Persistence.Efcore.Migrations
 {
     [DbContext(typeof(WsrcContext))]
-    partial class WsrcContextModelSnapshot : ModelSnapshot
+    [Migration("20241222183702_AddChannel")]
+    partial class AddChannel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
