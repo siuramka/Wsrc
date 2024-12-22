@@ -1,7 +1,7 @@
 using NSubstitute;
 using Wsrc.Core.Interfaces.Mappings;
 
-namespace Wsrc.Tests.Reusables;
+namespace Wsrc.Tests.Reusables.Mocks;
 
 public class MapperMock
 {

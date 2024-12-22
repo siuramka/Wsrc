@@ -1,4 +1,4 @@
-namespace Wsrc.Domain;
+namespace Wsrc.Domain.Models;
 
 public class PusherEvent
 {

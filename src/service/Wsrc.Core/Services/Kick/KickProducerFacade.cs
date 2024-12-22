@@ -23,6 +23,7 @@ public class KickProducerFacade(
         using var scope = serviceScopeFactory.CreateScope();
         var messageProcessor = scope.ServiceProvider.GetService<IKickMessageProducerProcessor>()
                                ?? throw new NullReferenceException();
+
         await messageProcessor.ProcessChannelMessagesAsync(kickPusherClient);
     }
 }

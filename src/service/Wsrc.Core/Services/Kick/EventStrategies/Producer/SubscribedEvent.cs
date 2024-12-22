@@ -1,5 +1,5 @@
 using Wsrc.Core.Interfaces;
-using Wsrc.Domain;
+using Wsrc.Domain.Models;
 
 namespace Wsrc.Core.Services.Kick.EventStrategies.Producer;
 

@@ -11,12 +11,13 @@ public class KickChatMessageBatchSavingService(
     IServiceScopeFactory serviceScopeFactory,
     IMapper mapper) : IKickMessageSavingService
 {
-    private const int MessageBatchSize = 100;
+    private const int MessageBatchSize = 10;
     private readonly List<Message> _messageBatch = [];
 
     public async Task HandleMessageAsync(KickChatMessage kickChatMessage)
     {
         var message = mapper.KickChatMessageMapper.ToMessage(kickChatMessage);
+
         _messageBatch.Add(message);
 
         await CreateSenderAsync(kickChatMessage);
@@ -37,6 +38,7 @@ public class KickChatMessageBatchSavingService(
         }
 
         var newSender = mapper.KickChatMessageMapper.ToSender(kickChatMessage);
+
         await senderRepository.AddAsync(newSender);
     }
 
@@ -47,12 +49,14 @@ public class KickChatMessageBatchSavingService(
             return;
         }
 
-        using var scope = serviceScopeFactory.CreateScope();
-        var messageRepository = scope.ServiceProvider.GetRequiredService<IAsyncRepository<Message>>();
-
         var messages = new List<Message>(_messageBatch);
 
-        await messageRepository.AddRangeAsync(messages);
+        using (var scope = serviceScopeFactory.CreateScope())
+        {
+            var messageRepository = scope.ServiceProvider.GetRequiredService<IAsyncRepository<Message>>();
+
+            await messageRepository.AddRangeAsync(messages);
+        }
 
         _messageBatch.Clear();
     }
