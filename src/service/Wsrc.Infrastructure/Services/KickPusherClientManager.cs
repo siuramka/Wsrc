@@ -1,26 +1,39 @@
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 using Wsrc.Core.Interfaces;
+using Wsrc.Core.Interfaces.Repositories;
 using Wsrc.Domain;
-using Wsrc.Infrastructure.Configuration;
+using Wsrc.Domain.Entities;
+using Wsrc.Domain.Models;
 
 namespace Wsrc.Infrastructure.Services;
 
 public class KickPusherClientManager(
-    IKickPusherClientFactory pusherClientFactory,
-    IOptions<KickConfiguration> kick) : IKickPusherClientManager
+    IServiceScopeFactory serviceScopeFactory,
+    IKickPusherClientFactory pusherClientFactory) : IKickPusherClientManager
 {
     public List<IKickPusherClient> ActiveConnections { get; } = [];
 
-    public Task Launch()
+    public async Task Launch()
     {
-        var kickPusherClients = pusherClientFactory.CreateClients(kick.Value.Channels);
+        var kickPusherClients = await GetClients();
 
         foreach (var kickPusherClient in kickPusherClients)
         {
-            _ = CreateConnection(kickPusherClient);
+            await CreateConnection(kickPusherClient);
         }
+    }
 
-        return Task.CompletedTask;
+    private async Task<IEnumerable<IKickPusherClient>> GetClients()
+    {
+        using var scope = serviceScopeFactory.CreateScope();
+        var channelRepository = scope.ServiceProvider
+                                    .GetService<IAsyncRepository<Channel>>()
+                                ?? throw new NullReferenceException();
+
+        var channels = await channelRepository.GetAllAsync();
+
+        var kickPusherClients = pusherClientFactory.CreateClients(channels.ToList());
+        return kickPusherClients;
     }
 
     private async Task CreateConnection(IKickPusherClient kickPusherClient)

@@ -1,10 +1,10 @@
-using Wsrc.Domain;
+using Wsrc.Domain.Entities;
 
 namespace Wsrc.Core.Interfaces;
 
 public interface IKickPusherClientFactory
 {
-    IKickPusherClient CreateClient(KickChannel channel);
+    IKickPusherClient CreateClient(Channel channel);
 
-    public IEnumerable<IKickPusherClient> CreateClients(IEnumerable<KickChannel> channels);
+    public IEnumerable<IKickPusherClient> CreateClients(IEnumerable<Channel> channels);
 }
