@@ -10,7 +10,7 @@ using Wsrc.Domain.Entities;
 using Wsrc.Domain.Models;
 using Wsrc.Tests.Reusables;
 
-namespace Wsrc.Tests.Core.Services.Kick;
+namespace Wsrc.Tests.Unit.Core.Services.Kick;
 
 [TestFixture]
 public class KickChatMessageBatchSavingServiceTests
