@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using Microsoft.Extensions.DependencyInjection;
 using Wsrc.Core.Interfaces;
 using Wsrc.Core.Interfaces.Mappings;
@@ -13,12 +12,12 @@ public class KickChatMessageBatchSavingService(
     IMapper mapper) : IKickMessageSavingService
 {
     private const int MessageBatchSize = 100;
-    private readonly ConcurrentQueue<Message> _messageBatch = [];
+    private readonly List<Message> _messageBatch = [];
 
     public async Task HandleMessageAsync(KickChatMessage kickChatMessage)
     {
         var message = mapper.KickChatMessageMapper.ToMessage(kickChatMessage);
-        _messageBatch.Enqueue(message);
+        _messageBatch.Add(message);
 
         await CreateSenderAsync(kickChatMessage);
         await FlushBatchesAsync();
@@ -27,8 +26,8 @@ public class KickChatMessageBatchSavingService(
     private async Task CreateSenderAsync(KickChatMessage kickChatMessage)
     {
         using var scope = serviceScopeFactory.CreateScope();
-
         var senderRepository = scope.ServiceProvider.GetRequiredService<IAsyncRepository<Sender>>();
+
         var sender = await senderRepository
             .FirstOrDefaultAsync(s => s.Id == kickChatMessage.Data.KickChatMessageSender.Id);
 

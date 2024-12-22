@@ -3,7 +3,9 @@ using Wsrc.Domain;
 
 namespace Wsrc.Core.Services.Kick.EventStrategies;
 
-public class KickEventStrategyHandler(IEnumerable<IKickEventStrategy> eventStrategies) : IKickEventStrategyHandler
+public class KickEventStrategyHandler(
+    IEnumerable<IKickEventStrategy> eventStrategies)
+    : IKickEventStrategyHandler
 {
     public IKickEventStrategy GetStrategy(PusherEvent pusherEvent)
     {

@@ -4,6 +4,8 @@ using Wsrc.Core.Interfaces;
 using Wsrc.Core.Interfaces.Mappings;
 using Wsrc.Core.Interfaces.Repositories;
 using Wsrc.Core.Services.Kick;
+using Wsrc.Core.Services.Kick.EventStrategies;
+using Wsrc.Core.Services.Kick.EventStrategies.Consumer;
 using Wsrc.Infrastructure.Configuration;
 using Wsrc.Infrastructure.Interfaces;
 using Wsrc.Infrastructure.Mappings;
@@ -37,8 +39,11 @@ public class Program
 
         builder.Services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
         builder.Services.AddSingleton<IKickMessageSavingService, KickChatMessageBatchSavingService>();
-        builder.Services.AddSingleton<IKickConsumerMessageProcessor, KickConsumerMessageProcessor>();
-        builder.Services.AddSingleton<IConsumerService, KickConsumerService>();
+        builder.Services.AddSingleton<IConsumerMessageProcessor, KickConsumerMessageProcessor>();
+        builder.Services.AddSingleton<IConsumerService, ConsumerService>();
+        
+        builder.Services.AddTransient<IKickEventStrategyHandler, KickEventStrategyHandler>();
+        builder.Services.AddTransient<IKickEventStrategy, ChatMessageEvent>();
         
         builder.Services.AddSingleton<IKickChatMessageMapper, KickChatMessageMapper>();
         builder.Services.AddSingleton<IMapper, Mapper>();

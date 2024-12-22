@@ -1,6 +1,6 @@
 namespace Wsrc.Core.Interfaces;
 
-public interface IKickConsumerMessageProcessor
+public interface IConsumerMessageProcessor
 {
     public Task ConsumeAsync(string data);
 }

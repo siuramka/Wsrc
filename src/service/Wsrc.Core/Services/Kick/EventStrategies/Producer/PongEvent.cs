@@ -1,7 +1,7 @@
 using Wsrc.Core.Interfaces;
 using Wsrc.Domain;
 
-namespace Wsrc.Core.Services.Kick.EventStrategies;
+namespace Wsrc.Core.Services.Kick.EventStrategies.Producer;
 
 public class PongEvent : IKickEventStrategy
 {

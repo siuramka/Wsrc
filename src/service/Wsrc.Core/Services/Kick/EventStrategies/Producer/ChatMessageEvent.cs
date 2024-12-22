@@ -1,8 +1,7 @@
-using System.Text.Json;
 using Wsrc.Core.Interfaces;
 using Wsrc.Domain;
 
-namespace Wsrc.Core.Services.Kick.EventStrategies;
+namespace Wsrc.Core.Services.Kick.EventStrategies.Producer;
 
 public class ChatMessageEvent(IProducerService producerService) : IKickEventStrategy
 {

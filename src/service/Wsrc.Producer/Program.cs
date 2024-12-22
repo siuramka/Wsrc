@@ -4,6 +4,7 @@ using Wsrc.Core.Interfaces;
 using Wsrc.Core.Interfaces.Repositories;
 using Wsrc.Core.Services.Kick;
 using Wsrc.Core.Services.Kick.EventStrategies;
+using Wsrc.Core.Services.Kick.EventStrategies.Producer;
 using Wsrc.Infrastructure.Configuration;
 using Wsrc.Infrastructure.Interfaces;
 using Wsrc.Infrastructure.Messaging;
