@@ -11,7 +11,7 @@ public class KickChatMessageBatchSavingService(
     IServiceScopeFactory serviceScopeFactory,
     IMapper mapper) : IKickMessageSavingService
 {
-    private const int MessageBatchSize = 10;
+    private const int MessageBatchSize = 100;
     private readonly List<Message> _messageBatch = [];
 
     public async Task HandleMessageAsync(KickChatMessage kickChatMessage)
