@@ -8,16 +8,16 @@ using Wsrc.Core.Services.Kick;
 using Wsrc.Domain;
 using Wsrc.Domain.Entities;
 using Wsrc.Domain.Models;
-using Wsrc.Tests.Reusables;
+using Wsrc.Tests.Reusables.Mocks;
 
 namespace Wsrc.Tests.Unit.Core.Services.Kick;
 
 [TestFixture]
 public class KickChatMessageBatchSavingServiceTests
 {
-    private IServiceScopeFactory _serviceScopeFactory;
-    private IServiceScope _serviceScope;
     private IServiceProvider _serviceProvider;
+    private IServiceScopeFactory _serviceScopeFactory;
+    
     private IAsyncRepository<Sender> _senderRepository;
     private IAsyncRepository<Message> _messageRepository;
     private IMapper _mapper;
@@ -27,26 +27,16 @@ public class KickChatMessageBatchSavingServiceTests
     [SetUp]
     public void SetUp()
     {
-        _serviceScopeFactory = Substitute.For<IServiceScopeFactory>();
-        _serviceScope = Substitute.For<IServiceScope>();
-        _serviceProvider = Substitute.For<IServiceProvider>();
         _senderRepository = Substitute.For<IAsyncRepository<Sender>>();
         _messageRepository = Substitute.For<IAsyncRepository<Message>>();
         _mapper = new MapperMock().SetupMapper();
-
-        _serviceScopeFactory.CreateScope().Returns(_serviceScope);
-        _serviceScope.ServiceProvider.Returns(_serviceProvider);
+        
+        (_serviceProvider, _serviceScopeFactory) = new ServiceProviderMock().SetupMock();
 
         _serviceProvider.GetService(typeof(IAsyncRepository<Message>)).Returns(_messageRepository);
         _serviceProvider.GetService(typeof(IAsyncRepository<Sender>)).Returns(_senderRepository);
 
         _service = new KickChatMessageBatchSavingService(_serviceScopeFactory, _mapper);
-    }
-
-    [TearDown]
-    public void TearDown()
-    {
-        _serviceScope.Dispose();
     }
 
     [Test]
