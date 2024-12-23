@@ -11,6 +11,7 @@ using Wsrc.Infrastructure.Messaging;
 using Wsrc.Infrastructure.Persistence;
 using Wsrc.Infrastructure.Persistence.Efcore.Repositories;
 using Wsrc.Infrastructure.Services;
+using Wsrc.Infrastructure.Startup;
 using Wsrc.Producer.Services;
 
 namespace Wsrc.Producer;
@@ -39,21 +40,7 @@ public class Program
             options.UseNpgsql(dbConfig.PostgresEfCoreConnectionString);
         });
 
-        builder.Services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
-
-        builder.Services.AddSingleton<IKickPusherClientFactory, KickPusherClientFactory>();
-        builder.Services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
-        builder.Services.AddSingleton<IProducerService, RabbitMqProducer>();
-        builder.Services.AddSingleton<IKickProducerFacade, KickProducerFacade>();
-        builder.Services.AddSingleton<IKickPusherClientManager, KickPusherClientManager>();
-
-        builder.Services.AddTransient<IKickEventStrategy, ChatMessageEvent>();
-        builder.Services.AddTransient<IKickEventStrategy, ConnectedEvent>();
-        builder.Services.AddTransient<IKickEventStrategy, PongEvent>();
-        builder.Services.AddTransient<IKickEventStrategy, SubscribedEvent>();
-        builder.Services.AddTransient<IKickEventStrategyHandler, KickEventStrategyHandler>();
-
-        builder.Services.AddScoped<IKickMessageProducerProcessor, KickProducerMessageProcessor>();
+        builder.Services.RegisterProducerServices();
 
         builder.Services.AddHostedService<ProducerWorkerService>();
 
