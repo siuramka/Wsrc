@@ -48,10 +48,7 @@ public abstract class ProducerIntegrationTestSetupBase
     }
 
     protected Dictionary<string, string> PostgreSqlConfig
-        => new()
-        {
-            { "Database:PostgresEfCoreConnectionString", PostgreSqlContainer.GetConnectionString() },
-        };
+        => new() { { "Database:PostgresEfCoreConnectionString", PostgreSqlContainer.GetConnectionString() }, };
 
     protected static Dictionary<string, string> KickConfig => new()
     {
@@ -75,8 +72,7 @@ public abstract class ProducerIntegrationTestSetupBase
     [TearDown]
     public async Task CleanupFakes()
     {
-        await FakePusherServer.App.StopAsync();
-        await FakePusherServer.App.DisposeAsync();
+        await FakePusherServer.DisposeAsync();
     }
 
     [TearDown]

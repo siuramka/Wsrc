@@ -9,19 +9,19 @@ using Wsrc.Domain.Models;
 
 namespace Wsrc.Tests.Integration.Fakes;
 
-public class FakePusherServer
+public class FakePusherServer : IDisposable, IAsyncDisposable
 {
     public readonly List<WebSocket> ActiveConnections = [];
-    public WebApplication App = null!;
+    private WebApplication _app = null!;
 
     public async Task StartAsync()
     {
         var builder = WebApplication.CreateBuilder();
-        App = builder.Build();
+        _app = builder.Build();
 
-        App.UseWebSockets();
+        _app.UseWebSockets();
 
-        App.Map("/app/{key}",
+        _app.Map("/app/{key}",
             async context =>
             {
                 if (context.WebSockets.IsWebSocketRequest)
@@ -32,7 +32,7 @@ public class FakePusherServer
                 }
             });
 
-        await App.StartAsync();
+        await _app.StartAsync();
     }
 
     public static string GetConnectionString()
@@ -83,5 +83,17 @@ public class FakePusherServer
             WebSocketMessageType.Text,
             true,
             CancellationToken.None);
+    }
+
+    public void Dispose()
+    {
+        _app.StopAsync().ConfigureAwait(false);
+        ((IDisposable)_app).Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _app.StopAsync();
+        await _app.DisposeAsync();
     }
 }
