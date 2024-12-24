@@ -6,6 +6,7 @@ public class KickChatMessageProvider : ProviderBase<KickChatMessage>
 {
     protected override KickChatMessage Entity { get; } = new()
     {
-        Event = PusherEvent.ChatMessage.Event, Data = new KickChatMessageChatInfoProvider().Create(),
+        Event = PusherEvent.ChatMessage.Event,
+        Data = new KickChatMessageChatInfoProvider().Create(),
     };
 }

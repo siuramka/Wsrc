@@ -6,6 +6,7 @@ public class KickChatMessageIdentityProvider : ProviderBase<KickChatMessageIdent
 {
     protected override KickChatMessageIdentity Entity { get; } = new()
     {
-        Color = "#FFFFFF", Badges = new KickChatMessageBadgeProvider().CreateList(5),
+        Color = "#FFFFFF",
+        Badges = new KickChatMessageBadgeProvider().CreateList(5),
     };
 }

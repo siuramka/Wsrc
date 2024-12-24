@@ -6,6 +6,9 @@ public class SenderProvider : ProviderBase<Sender>
 {
     protected override Sender Entity { get; } = new()
     {
-        Id = 425146436, Username = "User1", Slug = "user", Messages = [],
+        Id = 425146436,
+        Username = "User1",
+        Slug = "user",
+        Messages = [],
     };
 }
