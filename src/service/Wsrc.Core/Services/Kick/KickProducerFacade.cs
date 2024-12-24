@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+
 using Wsrc.Core.Interfaces;
 
 namespace Wsrc.Core.Services.Kick;

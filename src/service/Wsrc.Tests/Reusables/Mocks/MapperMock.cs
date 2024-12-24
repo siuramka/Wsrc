@@ -1,4 +1,5 @@
 using NSubstitute;
+
 using Wsrc.Core.Interfaces.Mappings;
 
 namespace Wsrc.Tests.Reusables.Mocks;

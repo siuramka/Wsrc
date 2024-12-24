@@ -1,7 +1,11 @@
 using System.Text.Json;
+
 using FluentAssertions;
+
 using Microsoft.Extensions.DependencyInjection;
+
 using NSubstitute;
+
 using Wsrc.Core.Services.Kick;
 
 namespace Wsrc.Tests.Unit.Core.Services.Kick;

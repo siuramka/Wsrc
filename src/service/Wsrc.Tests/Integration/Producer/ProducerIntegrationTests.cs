@@ -12,7 +12,7 @@ public class ProducerIntegrationTests : ProducerIntegrationTestBase
     }
 
     [Test]
-    public async Task Producer_ConnectsChannelsAndSubscribesToPusher()
+    public void Producer_ConnectsChannelsAndSubscribesToPusher()
     {
         // Arrange
         const int channelsCount = 2;

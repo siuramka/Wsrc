@@ -1,6 +1,8 @@
 using System.Text;
+
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+
 using Wsrc.Core.Interfaces;
 using Wsrc.Infrastructure.Constants;
 using Wsrc.Infrastructure.Interfaces;
@@ -12,8 +14,8 @@ public class ConsumerService(
     IConsumerMessageProcessor messageProcessor)
     : IConsumerService, IAsyncDisposable
 {
-    private IChannel _channel;
-    private IConnection _connection;
+    private IChannel _channel = null!;
+    private IConnection _connection = null!;
 
     public async Task ConnectAsync()
     {

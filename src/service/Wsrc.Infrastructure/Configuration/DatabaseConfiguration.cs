@@ -1,4 +1,5 @@
 using System.Dynamic;
+
 using Wsrc.Infrastructure.Interfaces;
 
 namespace Wsrc.Infrastructure.Configuration;

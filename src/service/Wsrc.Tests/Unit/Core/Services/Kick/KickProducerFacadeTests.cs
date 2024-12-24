@@ -1,8 +1,12 @@
 using System.Collections.Concurrent;
+
 using FluentAssertions;
 using FluentAssertions.Execution;
+
 using Microsoft.Extensions.DependencyInjection;
+
 using NSubstitute;
+
 using Wsrc.Core.Interfaces;
 using Wsrc.Core.Services.Kick;
 using Wsrc.Tests.Reusables.Mocks;

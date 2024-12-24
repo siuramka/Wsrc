@@ -1,11 +1,10 @@
 using System.Text.Json.Serialization;
-using Wsrc.Domain.Models;
 
-namespace Wsrc.Domain;
+namespace Wsrc.Domain.Models;
 
 public class KickChatMessage
 {
-    [JsonPropertyName("event")] public string Event { get; set; }
+    [JsonPropertyName("event")] public required string Event { get; set; }
 
-    [JsonPropertyName("data")] public KickChatMessageChatInfo Data { get; set; }
+    [JsonPropertyName("data")] public required KickChatMessageChatInfo Data { get; set; }
 }

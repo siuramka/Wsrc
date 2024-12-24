@@ -1,5 +1,7 @@
 using System.Linq.Expressions;
+
 using Microsoft.EntityFrameworkCore;
+
 using Wsrc.Core.Interfaces.Repositories;
 using Wsrc.Domain.Entities;
 

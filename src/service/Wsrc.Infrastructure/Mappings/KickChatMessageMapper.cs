@@ -1,6 +1,7 @@
 using Wsrc.Core.Interfaces.Mappings;
 using Wsrc.Domain;
 using Wsrc.Domain.Entities;
+using Wsrc.Domain.Models;
 
 namespace Wsrc.Infrastructure.Mappings;
 

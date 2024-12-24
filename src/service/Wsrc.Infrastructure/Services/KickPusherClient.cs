@@ -1,7 +1,9 @@
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+
 using Microsoft.Extensions.Options;
+
 using Wsrc.Core.Interfaces;
 using Wsrc.Domain;
 using Wsrc.Infrastructure.Configuration;
@@ -14,7 +16,7 @@ public class KickPusherClient(
 {
     private readonly ClientWebSocket _socketClient = new();
 
-    public string ChannelName { get; init; }
+    public required string ChannelName { get; init; }
 
     public int ChannelId { get; init; }
 

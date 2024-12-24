@@ -1,9 +1,11 @@
 using Microsoft.Extensions.DependencyInjection;
+
 using Wsrc.Core.Interfaces;
 using Wsrc.Core.Interfaces.Mappings;
 using Wsrc.Core.Interfaces.Repositories;
 using Wsrc.Domain;
 using Wsrc.Domain.Entities;
+using Wsrc.Domain.Models;
 
 namespace Wsrc.Core.Services.Kick;
 
