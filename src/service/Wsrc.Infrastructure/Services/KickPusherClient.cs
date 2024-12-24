@@ -16,7 +16,7 @@ public class KickPusherClient(
 {
     private readonly ClientWebSocket _socketClient = new();
 
-    public string ChannelName { get; init; }
+    public required string ChannelName { get; init; }
 
     public int ChannelId { get; init; }
 

@@ -12,7 +12,7 @@ public class PusherEvent
 
     public static readonly PusherEvent Subscribed = new() { Event = "pusher_internal:subscription_succeeded" };
 
-    public string Event { get; private init; }
+    public string Event { get; private init; } = null!;
 
     public static PusherEvent Parse(string eventName)
     {

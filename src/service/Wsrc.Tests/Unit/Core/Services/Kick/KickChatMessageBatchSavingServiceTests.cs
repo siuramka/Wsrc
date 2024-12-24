@@ -8,10 +8,9 @@ using NSubstitute;
 using Wsrc.Core.Interfaces.Mappings;
 using Wsrc.Core.Interfaces.Repositories;
 using Wsrc.Core.Services.Kick;
-using Wsrc.Domain;
 using Wsrc.Domain.Entities;
-using Wsrc.Domain.Models;
 using Wsrc.Tests.Reusables.Mocks;
+using Wsrc.Tests.Reusables.Providers;
 
 namespace Wsrc.Tests.Unit.Core.Services.Kick;
 
@@ -46,28 +45,9 @@ public class KickChatMessageBatchSavingServiceTests
     public async Task HandleMessageAsync_CreatesSender_WhenSenderDoesntExist()
     {
         // Arrange
-        var kickChatMessage = new KickChatMessage
-        {
-            Data = new KickChatMessageChatInfo
-            {
-                ChatroomId = 1,
-                Content = "Hello, World!",
-                CreatedAt = DateTime.UtcNow,
-                KickChatMessageSender = new KickChatMessageSender
-                {
-                    Id = 1,
-                    Username = "User1",
-                    Slug = "user1",
-                },
-            },
-        };
+        var kickChatMessage = new KickChatMessageProvider().Create();
 
-        var sender = new Sender
-        {
-            Id = 1,
-            Username = "User1",
-            Slug = "user1",
-        };
+        var sender = new SenderProvider().Create();
 
         _mapper.KickChatMessageMapper.ToSender(kickChatMessage).Returns(sender);
 
@@ -84,28 +64,9 @@ public class KickChatMessageBatchSavingServiceTests
     public async Task HandleMessageAsync_DoesntCreateSender_WhenSenderExists()
     {
         // Arrange
-        var kickChatMessage = new KickChatMessage
-        {
-            Data = new KickChatMessageChatInfo
-            {
-                ChatroomId = 1,
-                Content = "Hello, World!",
-                CreatedAt = DateTime.UtcNow,
-                KickChatMessageSender = new KickChatMessageSender
-                {
-                    Id = 1,
-                    Username = "User1",
-                    Slug = "user1",
-                },
-            },
-        };
+        var kickChatMessage = new KickChatMessageProvider().Create();
 
-        var sender = new Sender
-        {
-            Id = 1,
-            Username = "User1",
-            Slug = "user1",
-        };
+        var sender = new SenderProvider().Create();
 
         _senderRepository
             .FirstOrDefaultAsync(Arg.Any<Expression<Func<Sender, bool>>>())
@@ -124,29 +85,9 @@ public class KickChatMessageBatchSavingServiceTests
     public async Task HandleMessageAsync_SavesBatchMessages_WhenBatchSizeIsReached()
     {
         // Arrange
-        var kickChatMessage = new KickChatMessage
-        {
-            Data = new KickChatMessageChatInfo
-            {
-                ChatroomId = 1,
-                Content = "Hello, World!",
-                CreatedAt = DateTime.UtcNow,
-                KickChatMessageSender = new KickChatMessageSender
-                {
-                    Id = 1,
-                    Username = "User1",
-                    Slug = "user1",
-                },
-            },
-        };
+        var kickChatMessage = new KickChatMessageProvider().Create();
 
-        var message = new Message
-        {
-            ChatroomId = 1,
-            Content = "Hello, World",
-            Timestamp = DateTime.UtcNow,
-            SenderId = 1,
-        };
+        var message = new MessageProvider().Create();
 
         _mapper.KickChatMessageMapper.ToMessage(kickChatMessage).Returns(message);
 
@@ -170,21 +111,7 @@ public class KickChatMessageBatchSavingServiceTests
     public async Task HandleMessageAsync_DontSaveBatchMessages_WhenBatchSizeIsNotReached(int messageCount)
     {
         // Arrange
-        var kickChatMessage = new KickChatMessage
-        {
-            Data = new KickChatMessageChatInfo
-            {
-                ChatroomId = 1,
-                Content = "Hello, World!",
-                CreatedAt = DateTime.UtcNow,
-                KickChatMessageSender = new KickChatMessageSender
-                {
-                    Id = 1,
-                    Username = "User1",
-                    Slug = "user1",
-                },
-            },
-        };
+        var kickChatMessage = new KickChatMessageProvider().Create();
 
         // Act 
         for (var i = 0; i < messageCount; i++)

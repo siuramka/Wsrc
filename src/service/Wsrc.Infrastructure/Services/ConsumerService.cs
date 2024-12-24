@@ -14,8 +14,8 @@ public class ConsumerService(
     IConsumerMessageProcessor messageProcessor)
     : IConsumerService, IAsyncDisposable
 {
-    private IChannel _channel;
-    private IConnection _connection;
+    private IChannel _channel = null!;
+    private IConnection _connection = null!;
 
     public async Task ConnectAsync()
     {

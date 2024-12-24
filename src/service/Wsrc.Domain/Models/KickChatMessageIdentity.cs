@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
 
+using Wsrc.Domain.Models;
+
 namespace Wsrc.Domain;
 
 public class KickChatMessageIdentity

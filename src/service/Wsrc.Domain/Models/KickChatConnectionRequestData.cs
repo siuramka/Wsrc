@@ -1,9 +1,9 @@
 using System.Text.Json.Serialization;
 
-namespace Wsrc.Domain;
+namespace Wsrc.Domain.Models;
 
 public class KickChatConnectionRequestData
 {
-    [JsonPropertyName("auth")] public string Auth { get; set; }
-    [JsonPropertyName("channel")] public string Channel { get; set; }
+    [JsonPropertyName("auth")] public required string Auth { get; set; }
+    [JsonPropertyName("channel")] public required string Channel { get; set; }
 }
