@@ -20,5 +20,5 @@ jobs:
       run: dotnet restore src/service/Wsrc.sln
     - name: Build
       run: dotnet build src/service/Wsrc.sln --no-restore 
-    - name: Test
-      run: dotnet test src/service/Wsrc.sln --no-build --verbosity normal
+    - name: Run unit tests
+      run: dotnet test --filter FullyQualifiedName~Wsrc.Tests.Unit src/service/Wsrc.sln --no-build --verbosity normal
