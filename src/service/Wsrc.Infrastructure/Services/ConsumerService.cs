@@ -1,6 +1,8 @@
 using System.Text;
+
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+
 using Wsrc.Core.Interfaces;
 using Wsrc.Infrastructure.Constants;
 using Wsrc.Infrastructure.Interfaces;

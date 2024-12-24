@@ -1,5 +1,6 @@
 using Testcontainers.PostgreSql;
 using Testcontainers.RabbitMq;
+
 using Wsrc.Tests.Integration.Fakes;
 
 namespace Wsrc.Tests.Integration.Producer.Setup;
@@ -70,7 +71,7 @@ public abstract class ProducerIntegrationTestSetupBase
         FakePusherServer = new FakePusherServer();
         await FakePusherServer.StartAsync();
     }
-    
+
     [TearDown]
     public async Task CleanupFakes()
     {

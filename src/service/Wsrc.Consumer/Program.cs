@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+
 using Wsrc.Core.Interfaces;
 using Wsrc.Core.Interfaces.Mappings;
 using Wsrc.Core.Interfaces.Repositories;
@@ -23,7 +24,7 @@ public class Program
         var builder = Host.CreateApplicationBuilder(args);
 
         var configuration = builder.Configuration;
-        
+
         builder.Configuration.AddEnvironmentVariables();
         builder.Services.Configure<DatabaseConfiguration>(configuration.GetSection(DatabaseConfiguration.Section));
         builder.Services.Configure<RabbitMqConfiguration>(configuration.GetSection(RabbitMqConfiguration.Section));
@@ -41,10 +42,10 @@ public class Program
         builder.Services.AddSingleton<IKickMessageSavingService, KickChatMessageBatchSavingService>();
         builder.Services.AddSingleton<IConsumerMessageProcessor, KickConsumerMessageProcessor>();
         builder.Services.AddSingleton<IConsumerService, ConsumerService>();
-        
+
         builder.Services.AddTransient<IKickEventStrategyHandler, KickEventStrategyHandler>();
         builder.Services.AddTransient<IKickEventStrategy, ChatMessageEvent>();
-        
+
         builder.Services.AddSingleton<IKickChatMessageMapper, KickChatMessageMapper>();
         builder.Services.AddSingleton<IMapper, Mapper>();
 

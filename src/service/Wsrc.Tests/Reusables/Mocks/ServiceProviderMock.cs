@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+
 using NSubstitute;
 
 namespace Wsrc.Tests.Reusables.Mocks;

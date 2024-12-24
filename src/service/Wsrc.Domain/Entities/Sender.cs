@@ -6,7 +6,7 @@ public class Sender : EntityBase, IEquatable<Sender>
     public string Username { get; set; }
 
     public string Slug { get; set; }
-    
+
     public virtual ICollection<Message> Messages { get; set; }
 
     public bool Equals(Sender? other)

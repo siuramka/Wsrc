@@ -1,5 +1,7 @@
 using System.Text;
+
 using RabbitMQ.Client;
+
 using Wsrc.Core.Interfaces;
 using Wsrc.Infrastructure.Constants;
 using Wsrc.Infrastructure.Interfaces;

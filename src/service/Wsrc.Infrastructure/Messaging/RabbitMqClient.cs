@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Options;
+
 using RabbitMQ.Client;
+
 using Wsrc.Infrastructure.Configuration;
 using Wsrc.Infrastructure.Interfaces;
 

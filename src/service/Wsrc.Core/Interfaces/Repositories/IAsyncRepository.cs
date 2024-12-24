@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+
 using Wsrc.Domain.Entities;
 
 namespace Wsrc.Core.Interfaces.Repositories;

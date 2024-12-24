@@ -1,7 +1,10 @@
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
+
 using Microsoft.Extensions.DependencyInjection;
+
 using NSubstitute;
+
 using Wsrc.Core.Interfaces.Mappings;
 using Wsrc.Core.Interfaces.Repositories;
 using Wsrc.Core.Services.Kick;
@@ -17,7 +20,7 @@ public class KickChatMessageBatchSavingServiceTests
 {
     private IServiceProvider _serviceProvider;
     private IServiceScopeFactory _serviceScopeFactory;
-    
+
     private IAsyncRepository<Sender> _senderRepository;
     private IAsyncRepository<Message> _messageRepository;
     private IMapper _mapper;
@@ -30,7 +33,7 @@ public class KickChatMessageBatchSavingServiceTests
         _senderRepository = Substitute.For<IAsyncRepository<Sender>>();
         _messageRepository = Substitute.For<IAsyncRepository<Message>>();
         _mapper = new MapperMock().SetupMapper();
-        
+
         (_serviceProvider, _serviceScopeFactory) = new ServiceProviderMock().SetupMock();
 
         _serviceProvider.GetService(typeof(IAsyncRepository<Message>)).Returns(_messageRepository);
