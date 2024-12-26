@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Builder;
 using Wsrc.Domain;
 using Wsrc.Domain.Models;
 
-namespace Wsrc.Tests.Integration.Fakes;
+namespace Wsrc.Tests.Integration.Reusables.Fakes;
 
-public class FakePusherServer : IDisposable, IAsyncDisposable
+public class FakePusherServer : IAsyncDisposable
 {
     public readonly List<WebSocket> ActiveConnections = [];
     private WebApplication _app = null!;
@@ -73,7 +73,7 @@ public class FakePusherServer : IDisposable, IAsyncDisposable
         return Encoding.UTF8.GetString(buffer, 0, result.Count);
     }
 
-    private static async Task SendMessageAsync(WebSocket webSocket, object message)
+    public async Task SendMessageAsync(WebSocket webSocket, object message)
     {
         var json = JsonSerializer.Serialize(message);
         var bytes = Encoding.UTF8.GetBytes(json);
@@ -83,12 +83,6 @@ public class FakePusherServer : IDisposable, IAsyncDisposable
             WebSocketMessageType.Text,
             true,
             CancellationToken.None);
-    }
-
-    public void Dispose()
-    {
-        _app.StopAsync().ConfigureAwait(false);
-        ((IDisposable)_app).Dispose();
     }
 
     public async ValueTask DisposeAsync()

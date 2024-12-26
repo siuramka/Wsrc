@@ -3,20 +3,21 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using Wsrc.Domain.Entities;
 using Wsrc.Infrastructure.Configuration;
 using Wsrc.Infrastructure.Persistence;
 using Wsrc.Infrastructure.Startup;
 using Wsrc.Producer.Services;
+using Wsrc.Tests.Integration.Reusables.Fakes;
+using Wsrc.Tests.Reusables.Providers;
 
 using RabbitMqConfiguration = Wsrc.Infrastructure.Configuration.RabbitMqConfiguration;
 
-namespace Wsrc.Tests.Integration.Producer.Setup;
+namespace Wsrc.Tests.Integration.Setup;
 
-[TestFixture]
-public abstract class ProducerIntegrationTestBase : ProducerIntegrationTestSetupBase
+public abstract class ProducerIntegrationTestBase : IntegrationTestBase
 {
-    protected IHost _host = null!;
+    protected FakePusherServer _fakePusherServer = null!;
+    private IHost _host = null!;
 
     protected async Task InitializeAsync()
     {
@@ -26,7 +27,7 @@ public abstract class ProducerIntegrationTestBase : ProducerIntegrationTestSetup
         );
 
         _host = Host.CreateDefaultBuilder()
-            .ConfigureHostConfiguration(config =>
+            .ConfigureAppConfiguration(config =>
             {
                 config.AddInMemoryCollection(RabbitMqConfig!);
                 config.AddInMemoryCollection(PostgreSqlConfig!);
@@ -44,7 +45,7 @@ public abstract class ProducerIntegrationTestBase : ProducerIntegrationTestSetup
 
                 services.AddDbContext<WsrcContext>((_, options) =>
                 {
-                    options.UseNpgsql(PostgreSqlContainer.GetConnectionString());
+                    options.UseNpgsql(_postgreSqlContainer.GetConnectionString());
                 });
 
                 services.AddHostedService<ProducerWorkerService>();
@@ -55,6 +56,60 @@ public abstract class ProducerIntegrationTestBase : ProducerIntegrationTestSetup
         await SeedRequiredData();
 
         await _host.StartAsync();
+
+        await WaitForPusherSubscriptions();
+    }
+
+    [TearDown]
+    public async Task Cleanup()
+    {
+        await _fakePusherServer.DisposeAsync();
+
+        await _host.StopAsync();
+        _host.Dispose();
+
+        await CleanupContainers();
+    }
+
+    private Dictionary<string, string> PostgreSqlConfig
+        => new()
+        {
+            { "Database:PostgresEfCoreConnectionString", DatabaseConfiguration.PostgresEfCoreConnectionString },
+        };
+
+    private Dictionary<string, string> RabbitMqConfig
+        => new()
+        {
+            { "RabbitMQ:HostName", RabbitMqConfiguration.HostName },
+            { "RabbitMQ:UserName", RabbitMqConfiguration.Username },
+            { "RabbitMQ:Password", RabbitMqConfiguration.Password },
+            { "RabbitMQ:Port", RabbitMqConfiguration.Port.ToString() },
+        };
+
+    private static Dictionary<string, string> KickConfig => new()
+    {
+        { "Kick:PusherConnectionString", FakePusherServer.GetConnectionString() },
+    };
+
+    private async Task SetupFakes()
+    {
+        _fakePusherServer = new FakePusherServer();
+        await _fakePusherServer.StartAsync();
+    }
+
+    private async Task WaitForPusherSubscriptions()
+    {
+        var completionSource = new TaskCompletionSource();
+        const int channelsCount = 2;
+
+        const int pollingInterval = 100;
+
+        while (_fakePusherServer.ActiveConnections.Count != channelsCount)
+        {
+            await Task.Delay(pollingInterval);
+        }
+
+        completionSource.SetResult();
     }
 
     private async Task UpdateDatabase()
@@ -76,28 +131,9 @@ public abstract class ProducerIntegrationTestBase : ProducerIntegrationTestSetup
             return;
         }
 
-        List<Channel> channels =
-        [
-            new()
-            {
-                Id = 11111,
-                Name = "TestChannel1",
-            },
-            new()
-            {
-                Id = 22222,
-                Name = "TestChannel2",
-            }
-        ];
+        var channels = new ChannelProvider().ProvideDefaultChannels();
 
         await context.Channels.AddRangeAsync(channels);
         await context.SaveChangesAsync();
-    }
-
-    [TearDown]
-    public async Task CleanupHostedService()
-    {
-        await _host.StopAsync();
-        _host.Dispose();
     }
 }

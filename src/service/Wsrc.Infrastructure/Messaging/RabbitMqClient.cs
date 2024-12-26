@@ -17,7 +17,8 @@ public class RabbitMqClient(IOptions<RabbitMqConfiguration> options) : IRabbitMq
         {
             UserName = _configuration.Username,
             Password = _configuration.Password,
-            HostName = _configuration.HostName
+            HostName = _configuration.HostName,
+            Port = _configuration.Port,
         };
 
         var connection = await defaultConnection.CreateConnectionAsync();
