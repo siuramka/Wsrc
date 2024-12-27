@@ -12,6 +12,15 @@ public abstract class IntegrationTestBase
     protected RabbitMqContainer _rabbitMqContainer = null!;
     protected PostgreSqlContainer _postgreSqlContainer = null!;
 
+    protected CancellationTokenSource _timeoutToken = new(DefaultTimeout);
+    protected readonly TimeSpan _pollInterval = TimeSpan.FromMilliseconds(250);
+    private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(30);
+
+    protected void ResetTimeoutToken()
+    {
+        _timeoutToken = new CancellationTokenSource(DefaultTimeout);
+    }
+
     protected RabbitMqConfiguration RabbitMqConfiguration => new()
     {
         HostName = _rabbitMqContainer.Hostname,
@@ -22,10 +31,10 @@ public abstract class IntegrationTestBase
 
     protected DatabaseConfiguration DatabaseConfiguration => new()
     {
-        PostgresEfCoreConnectionString = _postgreSqlContainer.GetConnectionString(),
+        PostgresEfCoreConnectionString = $"{_postgreSqlContainer.GetConnectionString()};IncludeErrorDetail=True",
     };
 
-    protected async Task SetupContainers()
+    protected async Task SetupContainersAsync()
     {
         await Task.WhenAll(
             SetupRabbitMqAsync(),

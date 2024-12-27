@@ -4,7 +4,7 @@ namespace Wsrc.Tests.Reusables.Providers;
 
 public class ChannelProvider
 {
-    public List<Channel> ProvideDefaultChannels()
+    public List<Channel> ProvideDefault()
     {
         return
         [

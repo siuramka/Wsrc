@@ -14,7 +14,6 @@ namespace Wsrc.Tests.Integration;
 [TestFixture]
 public class ProducerIntegrationTests : ProducerIntegrationTestBase
 {
-    //todo figure out when to dispose/setup etc
     [SetUp]
     public async Task SetUpAsync()
     {
@@ -37,14 +36,7 @@ public class ProducerIntegrationTests : ProducerIntegrationTestBase
         // Arrange
         var testRabbitMqClientStub = new TestRabbitMqClientStub();
 
-        await testRabbitMqClientStub.ConnectAsync(
-            new ConnectionFactory
-            {
-                UserName = RabbitMqConfiguration.Username,
-                Port = RabbitMqConfiguration.Port,
-                Password = RabbitMqConfiguration.Password,
-            }
-        );
+        await testRabbitMqClientStub.ConnectAsync(RabbitMqConfiguration);
 
         var receivedMessageTask = new TaskCompletionSource<string>();
 
@@ -63,8 +55,8 @@ public class ProducerIntegrationTests : ProducerIntegrationTestBase
         await _fakePusherServer.SendMessageAsync(firstChannelConnection, message);
 
         // Assert
-        var shouldBeMessage = JsonSerializer.Serialize(message);
         var consumedMessage = await receivedMessageTask.Task;
+        var shouldBeMessage = JsonSerializer.Serialize(message);
         consumedMessage.Should().Be(shouldBeMessage);
     }
 }
