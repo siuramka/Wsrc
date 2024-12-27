@@ -3,59 +3,82 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using Wsrc.Domain.Entities;
+using Wsrc.Consumer;
 using Wsrc.Infrastructure.Configuration;
 using Wsrc.Infrastructure.Persistence;
 using Wsrc.Infrastructure.Startup;
-using Wsrc.Producer.Services;
+using Wsrc.Tests.Reusables.Providers;
 
 using RabbitMqConfiguration = Wsrc.Infrastructure.Configuration.RabbitMqConfiguration;
 
-namespace Wsrc.Tests.Integration.Producer.Setup;
+namespace Wsrc.Tests.Integration.Setup;
 
-[TestFixture]
-public abstract class ProducerIntegrationTestBase : ProducerIntegrationTestSetupBase
+public abstract class ConsumerIntegrationTestBase : IntegrationTestBase
 {
     protected IHost _host = null!;
 
     protected async Task InitializeAsync()
     {
-        await Task.WhenAll(
-            SetupContainers(),
-            SetupFakes()
-        );
+        await SetupContainersAsync();
 
-        _host = Host.CreateDefaultBuilder()
-            .ConfigureHostConfiguration(config =>
-            {
-                config.AddInMemoryCollection(RabbitMqConfig!);
-                config.AddInMemoryCollection(PostgreSqlConfig!);
-                config.AddInMemoryCollection(KickConfig!);
-            })
-            .ConfigureServices((context, services) =>
-            {
-                services.RegisterProducerServices();
-
-                var configuration = context.Configuration;
-
-                services.Configure<RabbitMqConfiguration>(configuration.GetSection(RabbitMqConfiguration.Section));
-                services.Configure<KickConfiguration>(configuration.GetSection(KickConfiguration.Section));
-                services.Configure<DatabaseConfiguration>(configuration.GetSection(DatabaseConfiguration.Section));
-
-                services.AddDbContext<WsrcContext>((_, options) =>
-                {
-                    options.UseNpgsql(PostgreSqlContainer.GetConnectionString());
-                });
-
-                services.AddHostedService<ProducerWorkerService>();
-            })
-            .Build();
+        BuildHost();
 
         await UpdateDatabase();
         await SeedRequiredData();
 
         await _host.StartAsync();
     }
+
+    [TearDown]
+    public async Task Cleanup()
+    {
+        await _host.StopAsync();
+        _host.Dispose();
+
+        await CleanupContainers();
+    }
+
+    private void BuildHost()
+    {
+        _host = Host.CreateDefaultBuilder()
+            .ConfigureAppConfiguration(config =>
+            {
+                config.AddInMemoryCollection(RabbitMqConfig!);
+                config.AddInMemoryCollection(PostgreSqlConfig!);
+            })
+            .ConfigureServices((context, services) =>
+            {
+                services.RegisterConsumerServices();
+
+                var configuration = context.Configuration;
+
+                services.Configure<RabbitMqConfiguration>(configuration.GetSection(RabbitMqConfiguration.Section));
+                services.Configure<DatabaseConfiguration>(configuration.GetSection(DatabaseConfiguration.Section));
+
+                services.AddDbContext<WsrcContext>((_, options) =>
+                {
+                    options.UseNpgsql(_postgreSqlContainer.GetConnectionString());
+                });
+
+                services.AddHostedService<ConsumerWorkerService>();
+            })
+            .Build();
+    }
+
+    private Dictionary<string, string> PostgreSqlConfig
+        => new()
+        {
+            { "Database:PostgresEfCoreConnectionString", DatabaseConfiguration.PostgresEfCoreConnectionString },
+        };
+
+    private Dictionary<string, string> RabbitMqConfig
+        => new()
+        {
+            { "RabbitMQ:HostName", RabbitMqConfiguration.HostName },
+            { "RabbitMQ:UserName", RabbitMqConfiguration.Username },
+            { "RabbitMQ:Password", RabbitMqConfiguration.Password },
+            { "RabbitMQ:Port", RabbitMqConfiguration.Port.ToString() },
+        };
 
     private async Task UpdateDatabase()
     {
@@ -71,33 +94,12 @@ public abstract class ProducerIntegrationTestBase : ProducerIntegrationTestSetup
         using var scope = _host.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<WsrcContext>();
 
-        if (context.Channels.Any())
-        {
-            return;
-        }
-
-        List<Channel> channels =
-        [
-            new()
-            {
-                Id = 11111,
-                Name = "TestChannel1",
-            },
-            new()
-            {
-                Id = 22222,
-                Name = "TestChannel2",
-            }
-        ];
+        var channels = new ChannelProvider().ProvideDefault();
+        var chatrooms = new ChatroomProvider().ProvideDefault();
 
         await context.Channels.AddRangeAsync(channels);
-        await context.SaveChangesAsync();
-    }
+        await context.Chatrooms.AddRangeAsync(chatrooms);
 
-    [TearDown]
-    public async Task CleanupHostedService()
-    {
-        await _host.StopAsync();
-        _host.Dispose();
+        await context.SaveChangesAsync();
     }
 }
