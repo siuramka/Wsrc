@@ -84,10 +84,25 @@ public class FakePusherServer : IAsyncDisposable
             true,
             CancellationToken.None);
     }
+    
+    public async Task SendMessageAsync(WebSocket webSocket, string message)
+    {
+        var bytes = Encoding.UTF8.GetBytes(message);
+
+        await webSocket.SendAsync(
+            new ArraySegment<byte>(bytes),
+            WebSocketMessageType.Text,
+            true,
+            CancellationToken.None);
+    }
+
+    public async Task StopAsync()
+    {
+        await _app.StopAsync();
+    }
 
     public async ValueTask DisposeAsync()
     {
-        await _app.StopAsync();
         await _app.DisposeAsync();
     }
 }
