@@ -7,9 +7,9 @@ services:
       - POSTGRES_DB=WsrcDb
     restart: always
     ports:
-        - "5432:5432"
+      - "5432:5432"
     volumes:
-      - wsrc.db:/var/lib/postgresql/data/ 
+      - wsrc.db:/var/lib/postgresql/data/
 
   messaging.rabbitmq:
     image: rabbitmq:3-management
@@ -28,10 +28,13 @@ services:
       - RABBITMQ__HOSTNAME=messaging.rabbitmq
       - RABBITMQ__USERNAME=wsrc-dev-user
       - RABBITMQ__PASSWORD=wsrc-dev-pwd
+      - RABBITMQ__PORT=5672
       - DATABASE__POSTGRESEFCORECONNECTIONSTRING=Server=wsrc.db;Database=WsrcDb;User Id=postgres;Password=postgres;TrustServerCertificate=True;IncludeErrorDetail=True
     depends_on:
-      - wsrc.db
-      - messaging.rabbitmq
+      messaging.rabbitmq-started:
+        condition: service_completed_successfully
+      wsrc.db:
+        condition: service_started
 
   wsrc.producer:
     build:
@@ -41,8 +44,17 @@ services:
       - RABBITMQ__HOSTNAME=messaging.rabbitmq
       - RABBITMQ__USERNAME=wsrc-dev-user
       - RABBITMQ__PASSWORD=wsrc-dev-pwd
+      - RABBITMQ__PORT=5672
       - DATABASE__POSTGRESEFCORECONNECTIONSTRING=Server=wsrc.db;Database=WsrcDb;User Id=postgres;Password=postgres;TrustServerCertificate=True;IncludeErrorDetail=True
       - KICK__PUSHERCONNECTIONSTRING=wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0-rc2&flash=false
     depends_on:
-        - wsrc.db
-        - messaging.rabbitmq
+      messaging.rabbitmq-started:
+        condition: service_completed_successfully
+      wsrc.db:
+        condition: service_started
+
+  messaging.rabbitmq-started:
+    image: jwilder/dockerize
+    depends_on:
+      - messaging.rabbitmq
+    command: 'dockerize -wait=tcp://messaging.rabbitmq:5672'
