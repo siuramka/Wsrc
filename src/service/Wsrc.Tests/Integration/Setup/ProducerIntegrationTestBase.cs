@@ -8,6 +8,7 @@ using Wsrc.Infrastructure.Persistence;
 using Wsrc.Infrastructure.Startup;
 using Wsrc.Producer.Services;
 using Wsrc.Tests.Integration.Reusables.Fakes;
+using Wsrc.Tests.Reusables.Helpers;
 using Wsrc.Tests.Reusables.Providers;
 
 using RabbitMqConfiguration = Wsrc.Infrastructure.Configuration.RabbitMqConfiguration;
@@ -39,6 +40,7 @@ public abstract class ProducerIntegrationTestBase : IntegrationTestBase
     [TearDown]
     public async Task Cleanup()
     {
+        await _fakePusherServer.StopAsync();
         await _fakePusherServer.DisposeAsync();
 
         await _host.StopAsync();
@@ -104,24 +106,11 @@ public abstract class ProducerIntegrationTestBase : IntegrationTestBase
 
     private async Task WaitForPusherSubscriptions()
     {
-        var timeout = TimeSpan.FromSeconds(15);
-        using var cts = new CancellationTokenSource(timeout);
-        var completionSource = new TaskCompletionSource();
-
         const int channelsCount = 2;
-        const int pollingInterval = 100;
 
-        while (_fakePusherServer.ActiveConnections.Count != channelsCount)
-        {
-            if (cts.IsCancellationRequested)
-            {
-                throw new TimeoutException("Pusher subscriptions did not complete in time");
-            }
+        var getHasActiveConnections = () => _fakePusherServer.ActiveConnections.Count == channelsCount;
 
-            await Task.Delay(pollingInterval, cts.Token);
-        }
-
-        completionSource.SetResult();
+        await TimeoutHelper.WaitUntilAsync(getHasActiveConnections);
     }
 
     private async Task UpdateDatabase()
@@ -137,11 +126,6 @@ public abstract class ProducerIntegrationTestBase : IntegrationTestBase
     {
         using var scope = _host.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<WsrcContext>();
-
-        if (context.Channels.Any())
-        {
-            return;
-        }
 
         var channels = new ChannelProvider().ProvideDefault();
 

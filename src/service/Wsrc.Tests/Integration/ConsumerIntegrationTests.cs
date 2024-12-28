@@ -1,4 +1,3 @@
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,7 +16,6 @@ public class ConsumerIntegrationTests : ConsumerIntegrationTestBase
     public async Task SetUp()
     {
         await InitializeAsync();
-        ResetTimeoutToken();
     }
 
     [Test]
@@ -33,7 +31,7 @@ public class ConsumerIntegrationTests : ConsumerIntegrationTestBase
         var firstChannel = new ChannelProvider().ProvideDefault().First();
 
         var getKickChatMessageBufferString = () => new kickChatMessageBufferProvider()
-            .ProvideDeserialized(firstChannel.Id.ToString());
+            .ProvideSerialized(firstChannel.Id.ToString());
 
         // Act
         var messagePublishTasks = Enumerable.Range(0, messageCount)
@@ -49,6 +47,6 @@ public class ConsumerIntegrationTests : ConsumerIntegrationTestBase
         var getHasRequiredMessageCountAsync = async ()
             => await context.Messages.CountAsync() == messageCount;
 
-        await TimeoutHelper.WaitUntilAsync(getHasRequiredMessageCountAsync, _pollInterval, _timeoutToken.Token);
+        await TimeoutHelper.WaitUntilAsync(getHasRequiredMessageCountAsync);
     }
 }
