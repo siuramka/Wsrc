@@ -28,6 +28,7 @@ services:
       - RABBITMQ__HOSTNAME=messaging.rabbitmq
       - RABBITMQ__USERNAME=wsrc-dev-user
       - RABBITMQ__PASSWORD=wsrc-dev-pwd
+      - RABBITMQ__PORT=5672
       - DATABASE__POSTGRESEFCORECONNECTIONSTRING=Server=wsrc.db;Database=WsrcDb;User Id=postgres;Password=postgres;TrustServerCertificate=True;IncludeErrorDetail=True
     depends_on:
       messaging.rabbitmq-started:
@@ -43,6 +44,7 @@ services:
       - RABBITMQ__HOSTNAME=messaging.rabbitmq
       - RABBITMQ__USERNAME=wsrc-dev-user
       - RABBITMQ__PASSWORD=wsrc-dev-pwd
+      - RABBITMQ__PORT=5672
       - DATABASE__POSTGRESEFCORECONNECTIONSTRING=Server=wsrc.db;Database=WsrcDb;User Id=postgres;Password=postgres;TrustServerCertificate=True;IncludeErrorDetail=True
       - KICK__PUSHERCONNECTIONSTRING=wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0-rc2&flash=false
     depends_on:
