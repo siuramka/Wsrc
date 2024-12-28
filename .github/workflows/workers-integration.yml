@@ -1,0 +1,26 @@
+name: Workers Integration Actions
+
+on:
+  pull_request:
+    paths:
+      - 'src/service/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore src/service/Wsrc.sln
+
+    - name: Build
+      run: dotnet build -c Release src/service/Wsrc.sln --no-restore 
+
+    - name: Run integration tests
+      run: dotnet test -c Release --filter FullyQualifiedName~Wsrc.Tests.Integration src/service/Wsrc.sln --no-build --verbosity normal
