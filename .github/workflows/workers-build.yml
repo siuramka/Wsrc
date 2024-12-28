@@ -2,16 +2,15 @@ name: Workers Build Actions
 
 on:
   push:
-    branches: [ "main" ]
     paths:
       - 'src/service/**'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
@@ -26,5 +25,5 @@ jobs:
     - name: Run unit tests
       run: dotnet test -c Release --filter FullyQualifiedName~Wsrc.Tests.Unit src/service/Wsrc.sln --no-build --verbosity normal
 
-    - name:
+    - name: Verify code formatting
       run: dotnet format src/service/Wsrc.sln --verify-no-changes
