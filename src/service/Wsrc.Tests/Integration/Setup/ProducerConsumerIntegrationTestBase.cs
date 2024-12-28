@@ -9,8 +9,8 @@ using Wsrc.Infrastructure.Persistence;
 using Wsrc.Infrastructure.Startup;
 using Wsrc.Producer.Services;
 using Wsrc.Tests.Integration.Reusables.Fakes;
+using Wsrc.Tests.Integration.Reusables.Helpers;
 using Wsrc.Tests.Reusables.Helpers;
-using Wsrc.Tests.Reusables.Providers;
 
 namespace Wsrc.Tests.Integration.Setup;
 
@@ -19,6 +19,8 @@ public abstract class ProducerConsumerIntegrationTestBase : IntegrationTestBase
     protected FakePusherServer _fakePusherServer = null!;
     protected IHost _producerHost = null!;
     protected IHost _consumerHost = null!;
+
+    private readonly TestConfigurationsSetup _configSetup = new();
 
     protected async Task InitializeAsync()
     {
@@ -30,8 +32,8 @@ public abstract class ProducerConsumerIntegrationTestBase : IntegrationTestBase
         BuildProducerHost();
         BuildConsumerHost();
 
-        await UpdateDatabase();
-        await SeedRequiredData();
+        await UpdateDatabaseAsync(_producerHost);
+        await SeedRequiredDataAsync(_producerHost);
 
         await Task.WhenAll(
             _producerHost.StartAsync(),
@@ -62,9 +64,9 @@ public abstract class ProducerConsumerIntegrationTestBase : IntegrationTestBase
         _producerHost = Host.CreateDefaultBuilder()
             .ConfigureAppConfiguration(config =>
             {
-                config.AddInMemoryCollection(RabbitMqConfig!);
-                config.AddInMemoryCollection(PostgreSqlConfig!);
-                config.AddInMemoryCollection(KickConfig!);
+                config.AddInMemoryCollection(_configSetup.GetRabbitMqConfig(RabbitMqConfiguration)!);
+                config.AddInMemoryCollection(_configSetup.GetPostgreSqlConfig(DatabaseConfiguration)!);
+                config.AddInMemoryCollection(_configSetup.GetKickConfig(FakePusherServer.GetConnectionString())!);
             })
             .ConfigureServices((context, services) =>
             {
@@ -91,8 +93,8 @@ public abstract class ProducerConsumerIntegrationTestBase : IntegrationTestBase
         _consumerHost = Host.CreateDefaultBuilder()
             .ConfigureAppConfiguration(config =>
             {
-                config.AddInMemoryCollection(RabbitMqConfig!);
-                config.AddInMemoryCollection(PostgreSqlConfig!);
+                config.AddInMemoryCollection(_configSetup.GetRabbitMqConfig(RabbitMqConfiguration)!);
+                config.AddInMemoryCollection(_configSetup.GetPostgreSqlConfig(DatabaseConfiguration)!);
             })
             .ConfigureServices((context, services) =>
             {
@@ -113,21 +115,6 @@ public abstract class ProducerConsumerIntegrationTestBase : IntegrationTestBase
             .Build();
     }
 
-    private Dictionary<string, string> PostgreSqlConfig
-        => new()
-        {
-            { "Database:PostgresEfCoreConnectionString", DatabaseConfiguration.PostgresEfCoreConnectionString },
-        };
-
-    private Dictionary<string, string> RabbitMqConfig
-        => new()
-        {
-            { "RabbitMQ:HostName", RabbitMqConfiguration.HostName },
-            { "RabbitMQ:UserName", RabbitMqConfiguration.Username },
-            { "RabbitMQ:Password", RabbitMqConfiguration.Password },
-            { "RabbitMQ:Port", RabbitMqConfiguration.Port.ToString() },
-        };
-
     private static Dictionary<string, string> KickConfig => new()
     {
         { "Kick:PusherConnectionString", FakePusherServer.GetConnectionString() },
@@ -146,27 +133,5 @@ public abstract class ProducerConsumerIntegrationTestBase : IntegrationTestBase
         var getHasActiveConnections = () => _fakePusherServer.ActiveConnections.Count == channelsCount;
 
         await TimeoutHelper.WaitUntilAsync(getHasActiveConnections);
-    }
-
-    private async Task UpdateDatabase()
-    {
-        using var scope = _producerHost.Services.CreateScope();
-        var services = scope.ServiceProvider;
-        var context = services.GetRequiredService<WsrcContext>();
-
-        await context.Database.MigrateAsync();
-    }
-
-    private async Task SeedRequiredData()
-    {
-        using var scope = _producerHost.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<WsrcContext>();
-
-        var channels = new ChannelProvider().ProvideDefault();
-        var chatrooms = new ChatroomProvider().ProvideDefault();
-
-        await context.Channels.AddRangeAsync(channels);
-        await context.Chatrooms.AddRangeAsync(chatrooms);
-        await context.SaveChangesAsync();
     }
 }

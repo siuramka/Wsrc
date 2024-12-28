@@ -3,8 +3,6 @@ using System.Text.Json;
 
 using FluentAssertions;
 
-using RabbitMQ.Client;
-
 using Wsrc.Tests.Integration.Reusables.Stubs;
 using Wsrc.Tests.Integration.Setup;
 using Wsrc.Tests.Reusables.Providers;
@@ -15,7 +13,7 @@ namespace Wsrc.Tests.Integration;
 public class ProducerIntegrationTests : ProducerIntegrationTestBase
 {
     [SetUp]
-    public async Task SetUpAsync()
+    public async Task SetUp()
     {
         await InitializeAsync();
     }

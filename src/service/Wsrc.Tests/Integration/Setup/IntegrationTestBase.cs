@@ -1,7 +1,14 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
 using Testcontainers.PostgreSql;
 using Testcontainers.RabbitMq;
 
 using Wsrc.Infrastructure.Configuration;
+using Wsrc.Infrastructure.Persistence;
+using Wsrc.Tests.Integration.Reusables.Constants;
+using Wsrc.Tests.Integration.Reusables.Helpers;
 
 using RabbitMqConfiguration = Wsrc.Infrastructure.Configuration.RabbitMqConfiguration;
 
@@ -15,9 +22,9 @@ public abstract class IntegrationTestBase
     protected RabbitMqConfiguration RabbitMqConfiguration => new()
     {
         HostName = _rabbitMqContainer.Hostname,
-        Username = "integration",
-        Password = "integration",
-        Port = _rabbitMqContainer.GetMappedPublicPort(5672),
+        Username = ContainerConstants.TestUsername,
+        Password = ContainerConstants.TestPassword,
+        Port = _rabbitMqContainer.GetMappedPublicPort(ContainerConstants.RabbitMqPort),
     };
 
     protected DatabaseConfiguration DatabaseConfiguration => new()
@@ -41,14 +48,32 @@ public abstract class IntegrationTestBase
         );
     }
 
+    protected static async Task UpdateDatabaseAsync(IHost host)
+    {
+        using var scope = host.Services.CreateScope();
+        var services = scope.ServiceProvider;
+        var context = services.GetRequiredService<WsrcContext>();
+
+        await context.Database.MigrateAsync();
+    }
+
+    protected static async Task SeedRequiredDataAsync(IHost host)
+    {
+        using var scope = host.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<WsrcContext>();
+
+        var seeder = new DefaultDataSeeder();
+        await seeder.SeedRequiredDataAsync(context);
+    }
+
     private async Task SetupPostgreSqlAsync()
     {
         _postgreSqlContainer = new PostgreSqlBuilder()
             .WithName($"postgresql-integration-{Guid.NewGuid()}")
-            .WithPortBinding(54320, true)
-            .WithUsername("integration")
-            .WithPassword("integration")
-            .WithDatabase("integration")
+            .WithPortBinding(ContainerConstants.PostgresPort, true)
+            .WithUsername(ContainerConstants.TestUsername)
+            .WithPassword(ContainerConstants.TestPassword)
+            .WithDatabase(ContainerConstants.TestDatabase)
             .Build();
 
         await _postgreSqlContainer.StartAsync();
@@ -58,9 +83,9 @@ public abstract class IntegrationTestBase
     {
         _rabbitMqContainer = new RabbitMqBuilder()
             .WithName($"rabbitmq-integration-{Guid.NewGuid()}")
-            .WithPortBinding(5672, true)
-            .WithUsername("integration")
-            .WithPassword("integration")
+            .WithPortBinding(ContainerConstants.RabbitMqPort, true)
+            .WithUsername(ContainerConstants.TestUsername)
+            .WithPassword(ContainerConstants.TestPassword)
             .Build();
 
         await _rabbitMqContainer.StartAsync();
