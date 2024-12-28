@@ -8,6 +8,7 @@ using Wsrc.Tests.Reusables.Providers;
 
 namespace Wsrc.Tests.Integration;
 
+[TestFixture]
 public class ProducerConsumerTests : ProducerConsumerIntegrationTestBase
 {
     [SetUp]

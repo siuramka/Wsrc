@@ -7,7 +7,7 @@ using Wsrc.Consumer;
 using Wsrc.Infrastructure.Configuration;
 using Wsrc.Infrastructure.Persistence;
 using Wsrc.Infrastructure.Startup;
-using Wsrc.Tests.Reusables.Providers;
+using Wsrc.Tests.Integration.Reusables.Helpers;
 
 using RabbitMqConfiguration = Wsrc.Infrastructure.Configuration.RabbitMqConfiguration;
 
@@ -16,6 +16,7 @@ namespace Wsrc.Tests.Integration.Setup;
 public abstract class ConsumerIntegrationTestBase : IntegrationTestBase
 {
     protected IHost _host = null!;
+    private readonly TestConfigurationsSetup _configSetup = new();
 
     protected async Task InitializeAsync()
     {
@@ -23,8 +24,8 @@ public abstract class ConsumerIntegrationTestBase : IntegrationTestBase
 
         BuildHost();
 
-        await UpdateDatabase();
-        await SeedRequiredData();
+        await UpdateDatabaseAsync(_host);
+        await SeedRequiredDataAsync(_host);
 
         await _host.StartAsync();
     }
@@ -43,8 +44,8 @@ public abstract class ConsumerIntegrationTestBase : IntegrationTestBase
         _host = Host.CreateDefaultBuilder()
             .ConfigureAppConfiguration(config =>
             {
-                config.AddInMemoryCollection(RabbitMqConfig!);
-                config.AddInMemoryCollection(PostgreSqlConfig!);
+                config.AddInMemoryCollection(_configSetup.GetRabbitMqConfig(RabbitMqConfiguration)!);
+                config.AddInMemoryCollection(_configSetup.GetPostgreSqlConfig(DatabaseConfiguration)!);
             })
             .ConfigureServices((context, services) =>
             {
@@ -63,43 +64,5 @@ public abstract class ConsumerIntegrationTestBase : IntegrationTestBase
                 services.AddHostedService<ConsumerWorkerService>();
             })
             .Build();
-    }
-
-    private Dictionary<string, string> PostgreSqlConfig
-        => new()
-        {
-            { "Database:PostgresEfCoreConnectionString", DatabaseConfiguration.PostgresEfCoreConnectionString },
-        };
-
-    private Dictionary<string, string> RabbitMqConfig
-        => new()
-        {
-            { "RabbitMQ:HostName", RabbitMqConfiguration.HostName },
-            { "RabbitMQ:UserName", RabbitMqConfiguration.Username },
-            { "RabbitMQ:Password", RabbitMqConfiguration.Password },
-            { "RabbitMQ:Port", RabbitMqConfiguration.Port.ToString() },
-        };
-
-    private async Task UpdateDatabase()
-    {
-        using var scope = _host.Services.CreateScope();
-        var services = scope.ServiceProvider;
-        var context = services.GetRequiredService<WsrcContext>();
-
-        await context.Database.MigrateAsync();
-    }
-
-    private async Task SeedRequiredData()
-    {
-        using var scope = _host.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<WsrcContext>();
-
-        var channels = new ChannelProvider().ProvideDefault();
-        var chatrooms = new ChatroomProvider().ProvideDefault();
-
-        await context.Channels.AddRangeAsync(channels);
-        await context.Chatrooms.AddRangeAsync(chatrooms);
-
-        await context.SaveChangesAsync();
     }
 }

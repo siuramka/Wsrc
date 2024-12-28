@@ -8,8 +8,8 @@ using Wsrc.Infrastructure.Persistence;
 using Wsrc.Infrastructure.Startup;
 using Wsrc.Producer.Services;
 using Wsrc.Tests.Integration.Reusables.Fakes;
+using Wsrc.Tests.Integration.Reusables.Helpers;
 using Wsrc.Tests.Reusables.Helpers;
-using Wsrc.Tests.Reusables.Providers;
 
 using RabbitMqConfiguration = Wsrc.Infrastructure.Configuration.RabbitMqConfiguration;
 
@@ -20,6 +20,8 @@ public abstract class ProducerIntegrationTestBase : IntegrationTestBase
     protected FakePusherServer _fakePusherServer = null!;
     private IHost _host = null!;
 
+    private readonly TestConfigurationsSetup _configSetup = new();
+
     protected async Task InitializeAsync()
     {
         await Task.WhenAll(
@@ -29,8 +31,8 @@ public abstract class ProducerIntegrationTestBase : IntegrationTestBase
 
         BuildHost();
 
-        await UpdateDatabase();
-        await SeedRequiredData();
+        await UpdateDatabaseAsync(_host);
+        await SeedRequiredDataAsync(_host);
 
         await _host.StartAsync();
 
@@ -54,9 +56,9 @@ public abstract class ProducerIntegrationTestBase : IntegrationTestBase
         _host = Host.CreateDefaultBuilder()
             .ConfigureAppConfiguration(config =>
             {
-                config.AddInMemoryCollection(RabbitMqConfig!);
-                config.AddInMemoryCollection(PostgreSqlConfig!);
-                config.AddInMemoryCollection(KickConfig!);
+                config.AddInMemoryCollection(_configSetup.GetRabbitMqConfig(RabbitMqConfiguration)!);
+                config.AddInMemoryCollection(_configSetup.GetPostgreSqlConfig(DatabaseConfiguration)!);
+                config.AddInMemoryCollection(_configSetup.GetKickConfig(FakePusherServer.GetConnectionString())!);
             })
             .ConfigureServices((context, services) =>
             {
@@ -78,26 +80,6 @@ public abstract class ProducerIntegrationTestBase : IntegrationTestBase
             .Build();
     }
 
-    private Dictionary<string, string> PostgreSqlConfig
-        => new()
-        {
-            { "Database:PostgresEfCoreConnectionString", DatabaseConfiguration.PostgresEfCoreConnectionString },
-        };
-
-    private Dictionary<string, string> RabbitMqConfig
-        => new()
-        {
-            { "RabbitMQ:HostName", RabbitMqConfiguration.HostName },
-            { "RabbitMQ:UserName", RabbitMqConfiguration.Username },
-            { "RabbitMQ:Password", RabbitMqConfiguration.Password },
-            { "RabbitMQ:Port", RabbitMqConfiguration.Port.ToString() },
-        };
-
-    private static Dictionary<string, string> KickConfig => new()
-    {
-        { "Kick:PusherConnectionString", FakePusherServer.GetConnectionString() },
-    };
-
     private async Task SetupFakes()
     {
         _fakePusherServer = new FakePusherServer();
@@ -111,25 +93,5 @@ public abstract class ProducerIntegrationTestBase : IntegrationTestBase
         var getHasActiveConnections = () => _fakePusherServer.ActiveConnections.Count == channelsCount;
 
         await TimeoutHelper.WaitUntilAsync(getHasActiveConnections);
-    }
-
-    private async Task UpdateDatabase()
-    {
-        using var scope = _host.Services.CreateScope();
-        var services = scope.ServiceProvider;
-        var context = services.GetRequiredService<WsrcContext>();
-
-        await context.Database.MigrateAsync();
-    }
-
-    private async Task SeedRequiredData()
-    {
-        using var scope = _host.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<WsrcContext>();
-
-        var channels = new ChannelProvider().ProvideDefault();
-
-        await context.Channels.AddRangeAsync(channels);
-        await context.SaveChangesAsync();
     }
 }
