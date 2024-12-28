@@ -84,7 +84,7 @@ public class FakePusherServer : IAsyncDisposable
             true,
             CancellationToken.None);
     }
-    
+
     public async Task SendMessageAsync(WebSocket webSocket, string message)
     {
         var bytes = Encoding.UTF8.GetBytes(message);
