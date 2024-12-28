@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+using Wsrc.Consumer;
 using Wsrc.Infrastructure.Configuration;
 using Wsrc.Infrastructure.Persistence;
 using Wsrc.Infrastructure.Startup;
@@ -11,14 +12,13 @@ using Wsrc.Tests.Integration.Reusables.Fakes;
 using Wsrc.Tests.Reusables.Helpers;
 using Wsrc.Tests.Reusables.Providers;
 
-using RabbitMqConfiguration = Wsrc.Infrastructure.Configuration.RabbitMqConfiguration;
-
 namespace Wsrc.Tests.Integration.Setup;
 
-public abstract class ProducerIntegrationTestBase : IntegrationTestBase
+public abstract class ProducerConsumerIntegrationTestBase : IntegrationTestBase
 {
     protected FakePusherServer _fakePusherServer = null!;
-    private IHost _host = null!;
+    protected IHost _producerHost = null!;
+    protected IHost _consumerHost = null!;
 
     protected async Task InitializeAsync()
     {
@@ -27,12 +27,16 @@ public abstract class ProducerIntegrationTestBase : IntegrationTestBase
             SetupFakes()
         );
 
-        BuildHost();
+        BuildProducerHost();
+        BuildConsumerHost();
 
         await UpdateDatabase();
         await SeedRequiredData();
 
-        await _host.StartAsync();
+        await Task.WhenAll(
+            _producerHost.StartAsync(),
+            _consumerHost.StartAsync()
+        );
 
         await WaitForPusherSubscriptions();
     }
@@ -40,18 +44,22 @@ public abstract class ProducerIntegrationTestBase : IntegrationTestBase
     [TearDown]
     public async Task Cleanup()
     {
-        await _fakePusherServer.StopAsync();
-        await _fakePusherServer.DisposeAsync();
+        await Task.WhenAll(
+            _producerHost.StopAsync(),
+            _consumerHost.StopAsync(),
+            _fakePusherServer.StopAsync()
+        );
 
-        await _host.StopAsync();
-        _host.Dispose();
+        _producerHost.Dispose();
+        _consumerHost.Dispose();
+        await _fakePusherServer.DisposeAsync();
 
         await CleanupContainers();
     }
 
-    private void BuildHost()
+    private void BuildProducerHost()
     {
-        _host = Host.CreateDefaultBuilder()
+        _producerHost = Host.CreateDefaultBuilder()
             .ConfigureAppConfiguration(config =>
             {
                 config.AddInMemoryCollection(RabbitMqConfig!);
@@ -74,6 +82,33 @@ public abstract class ProducerIntegrationTestBase : IntegrationTestBase
                 });
 
                 services.AddHostedService<ProducerWorkerService>();
+            })
+            .Build();
+    }
+
+    private void BuildConsumerHost()
+    {
+        _consumerHost = Host.CreateDefaultBuilder()
+            .ConfigureAppConfiguration(config =>
+            {
+                config.AddInMemoryCollection(RabbitMqConfig!);
+                config.AddInMemoryCollection(PostgreSqlConfig!);
+            })
+            .ConfigureServices((context, services) =>
+            {
+                services.RegisterConsumerServices();
+
+                var configuration = context.Configuration;
+
+                services.Configure<RabbitMqConfiguration>(configuration.GetSection(RabbitMqConfiguration.Section));
+                services.Configure<DatabaseConfiguration>(configuration.GetSection(DatabaseConfiguration.Section));
+
+                services.AddDbContext<WsrcContext>((_, options) =>
+                {
+                    options.UseNpgsql(_postgreSqlContainer.GetConnectionString());
+                });
+
+                services.AddHostedService<ConsumerWorkerService>();
             })
             .Build();
     }
@@ -115,7 +150,7 @@ public abstract class ProducerIntegrationTestBase : IntegrationTestBase
 
     private async Task UpdateDatabase()
     {
-        using var scope = _host.Services.CreateScope();
+        using var scope = _producerHost.Services.CreateScope();
         var services = scope.ServiceProvider;
         var context = services.GetRequiredService<WsrcContext>();
 
@@ -124,12 +159,14 @@ public abstract class ProducerIntegrationTestBase : IntegrationTestBase
 
     private async Task SeedRequiredData()
     {
-        using var scope = _host.Services.CreateScope();
+        using var scope = _producerHost.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<WsrcContext>();
 
         var channels = new ChannelProvider().ProvideDefault();
+        var chatrooms = new ChatroomProvider().ProvideDefault();
 
         await context.Channels.AddRangeAsync(channels);
+        await context.Chatrooms.AddRangeAsync(chatrooms);
         await context.SaveChangesAsync();
     }
 }

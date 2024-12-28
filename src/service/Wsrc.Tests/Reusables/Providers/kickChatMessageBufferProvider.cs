@@ -2,7 +2,7 @@ namespace Wsrc.Tests.Reusables.Providers;
 
 public class kickChatMessageBufferProvider
 {
-    public string ProvideDeserialized(string channelId)
+    public string ProvideSerialized(string channelId)
     {
         var randomMessageContent = Guid.NewGuid().ToString();
         var randomUser = Guid.NewGuid().ToString();

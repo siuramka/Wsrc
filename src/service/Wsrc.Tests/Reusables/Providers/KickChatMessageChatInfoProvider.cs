@@ -7,7 +7,7 @@ public class KickChatMessageChatInfoProvider : ProviderBase<KickChatMessageChatI
     protected override KickChatMessageChatInfo Entity { get; } = new()
     {
         Id = Guid.NewGuid(),
-        ChatroomId = 1000,
+        ChatroomId = 11111,
         Content = "Test content",
         Type = "Test type",
         CreatedAt = new DateTime(2022, 02, 02),
