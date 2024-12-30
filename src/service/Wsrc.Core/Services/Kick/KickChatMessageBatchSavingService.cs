@@ -3,26 +3,26 @@ using Microsoft.Extensions.DependencyInjection;
 using Wsrc.Core.Interfaces;
 using Wsrc.Core.Interfaces.Mappings;
 using Wsrc.Core.Interfaces.Repositories;
-using Wsrc.Domain;
 using Wsrc.Domain.Entities;
 using Wsrc.Domain.Models;
+
+using Message = Wsrc.Domain.Entities.Message;
 
 namespace Wsrc.Core.Services.Kick;
 
 public class KickChatMessageBatchSavingService(
     IServiceScopeFactory serviceScopeFactory,
-    IMapper mapper) : IKickMessageSavingService
+    IMapper mapper,
+    IConsumerServiceAcknowledger acknowledger) : IKickMessageSavingService
 {
     private const int MessageBatchSize = 100;
-    private readonly List<Message> _messageBatch = [];
+    private readonly List<ParsedKickChatMessage> _messageBatch = [];
 
-    public async Task HandleMessageAsync(KickChatMessage kickChatMessage)
+    public async Task HandleMessageAsync(ParsedKickChatMessage parsedKickChatMessage)
     {
-        var message = mapper.KickChatMessageMapper.ToMessage(kickChatMessage);
+        _messageBatch.Add(parsedKickChatMessage);
 
-        _messageBatch.Add(message);
-
-        await CreateSenderAsync(kickChatMessage);
+        await CreateSenderAsync(parsedKickChatMessage.KickChatMessage);
         await FlushBatchesAsync();
     }
 
@@ -51,15 +51,29 @@ public class KickChatMessageBatchSavingService(
             return;
         }
 
-        var messages = new List<Message>(_messageBatch);
+        var messageEntities = _messageBatch
+            .Select(m => mapper.KickChatMessageMapper.ToMessage(m.KickChatMessage))
+            .ToList();
 
         using (var scope = serviceScopeFactory.CreateScope())
         {
             var messageRepository = scope.ServiceProvider.GetRequiredService<IAsyncRepository<Message>>();
 
-            await messageRepository.AddRangeAsync(messages);
+            await messageRepository.AddRangeAsync(messageEntities);
         }
 
+        await AckBatchAsync();
         _messageBatch.Clear();
+    }
+
+    private async Task AckBatchAsync()
+    {
+        var messageEnvelopes = _messageBatch
+            .Select(kcm => kcm.MessageEnvelope);
+
+        foreach (var messageEnvelope in messageEnvelopes)
+        {
+            await acknowledger.AcknowledgeAsync(messageEnvelope);
+        }
     }
 }

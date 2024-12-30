@@ -23,7 +23,8 @@ public static class ConsumerServiceRegister
         services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
         services.AddSingleton<IKickMessageSavingService, KickChatMessageBatchSavingService>();
         services.AddSingleton<IConsumerMessageProcessor, KickConsumerMessageProcessor>();
-        services.AddSingleton<IConsumerService, ConsumerService>();
+        services.AddSingleton<IConsumerService, RabbitMqConsumerService>();
+        services.AddSingleton<IConsumerServiceAcknowledger, ConsumerServiceAcknowledger>();
 
         services.AddTransient<IKickEventStrategyHandler, KickEventStrategyHandler>();
         services.AddTransient<IKickEventStrategy, ChatMessageEvent>();

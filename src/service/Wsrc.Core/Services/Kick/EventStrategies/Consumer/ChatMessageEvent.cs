@@ -1,7 +1,6 @@
 using System.Text.Json;
 
 using Wsrc.Core.Interfaces;
-using Wsrc.Domain;
 using Wsrc.Domain.Models;
 
 namespace Wsrc.Core.Services.Kick.EventStrategies.Consumer;
@@ -13,22 +12,26 @@ public class ChatMessageEvent(IKickMessageSavingService kickMessageSavingService
         return pusherEvent.Event == PusherEvent.ChatMessage.Event;
     }
 
-    public async Task ExecuteAsync(string data)
+    public async Task ExecuteAsync(MessageEnvelope messageEnvelope)
     {
         var kickChatMessageBuffer = JsonSerializer
-                                        .Deserialize<KickChatMessageBuffer>(data)
-                                    ?? throw new Exception("Failed to deserialize message");
+            .Deserialize<KickChatMessageBuffer>(messageEnvelope.Payload.ToString()!);
 
         var kickChatMessageChatInfo = JsonSerializer
-                                          .Deserialize<KickChatMessageChatInfo>(kickChatMessageBuffer.Data)
-                                      ?? throw new Exception("Failed to deserialize message");
+            .Deserialize<KickChatMessageChatInfo>(kickChatMessageBuffer!.Data);
 
         var kickChatMessage = new KickChatMessage
         {
             Event = kickChatMessageBuffer.Event,
-            Data = kickChatMessageChatInfo,
+            Data = kickChatMessageChatInfo!,
         };
 
-        await kickMessageSavingService.HandleMessageAsync(kickChatMessage);
+        var kickChatMessageWithMessage = new ParsedKickChatMessage
+        {
+            KickChatMessage = kickChatMessage,
+            MessageEnvelope = messageEnvelope,
+        };
+
+        await kickMessageSavingService.HandleMessageAsync(kickChatMessageWithMessage);
     }
 }

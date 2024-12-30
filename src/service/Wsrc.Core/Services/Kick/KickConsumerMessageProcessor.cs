@@ -13,18 +13,17 @@ public class KickConsumerMessageProcessor(
 )
     : IConsumerMessageProcessor
 {
-    public async Task ConsumeAsync(string data)
+    public async Task ConsumeAsync(MessageEnvelope messageEnvelope)
     {
-        var kickEvent = JsonSerializer.Deserialize<KickEvent>(data)
-                        ?? throw new NotSupportedException("Failed to deserialize message");
+        var kickEvent = JsonSerializer.Deserialize<KickEvent>(messageEnvelope.Payload.ToString()!);
 
-        var pusherEvent = PusherEvent.Parse(kickEvent.Event);
+        var pusherEvent = PusherEvent.Parse(kickEvent!.Event);
 
         using var scope = serviceScopeFactory.CreateScope();
         var eventHandler = scope.ServiceProvider.GetRequiredService<IKickEventStrategyHandler>();
 
         var strategy = eventHandler.GetStrategy(pusherEvent);
 
-        await strategy.ExecuteAsync(data);
+        await strategy.ExecuteAsync(messageEnvelope);
     }
 }

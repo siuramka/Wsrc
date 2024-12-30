@@ -10,8 +10,8 @@ public class ChatMessageEvent(IProducerService producerService) : IKickEventStra
         return pusherEvent.Event == PusherEvent.ChatMessage.Event;
     }
 
-    public async Task ExecuteAsync(string data)
+    public async Task ExecuteAsync(MessageEnvelope messageEnvelope)
     {
-        await producerService.SendMessage(data);
+        await producerService.SendMessage(messageEnvelope.Payload.ToString()!);
     }
 }
