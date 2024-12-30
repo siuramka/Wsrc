@@ -10,7 +10,7 @@ public class PongEvent : IKickEventStrategy
         return pusherEvent.Event == PusherEvent.Pong.Event;
     }
 
-    public Task ExecuteAsync(string data)
+    public Task ExecuteAsync(MessageEnvelope messageEnvelope)
     {
         Console.WriteLine("PONG");
         return Task.CompletedTask;

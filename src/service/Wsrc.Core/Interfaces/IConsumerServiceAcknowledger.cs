@@ -2,11 +2,7 @@ using Wsrc.Domain.Models;
 
 namespace Wsrc.Core.Interfaces;
 
-public interface IConsumerService
+public interface IConsumerServiceAcknowledger
 {
-    Task ConnectAsync();
-
-    Task ConsumeMessagesAsync();
-
     Task AcknowledgeAsync(MessageEnvelope messageEnvelope);
 }

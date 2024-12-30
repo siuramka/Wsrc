@@ -4,12 +4,14 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
 using Wsrc.Core.Interfaces;
+using Wsrc.Domain.Models;
 using Wsrc.Infrastructure.Constants;
 using Wsrc.Infrastructure.Interfaces;
+using Wsrc.Infrastructure.Services.MessageEnvelopeDecorator;
 
 namespace Wsrc.Infrastructure.Services;
 
-public class ConsumerService(
+public class RabbitMqConsumerService(
     IRabbitMqClient rabbitMqClient,
     IConsumerMessageProcessor messageProcessor)
     : IConsumerService, IAsyncDisposable
@@ -45,24 +47,28 @@ public class ConsumerService(
         var body = ea.Body.ToArray();
         var messageString = Encoding.UTF8.GetString(body);
 
-        await messageProcessor.ConsumeAsync(messageString);
+        var message = new MessageEnvelope { Payload = messageString };
 
-        await _channel.BasicAckAsync(ea.DeliveryTag, false);
+        var rabbitMqMessageDecorator = new RabbitMqMessageEnvelopeDecorator(ea, message);
+
+        var decorated = rabbitMqMessageDecorator.Decorate();
+
+        await messageProcessor.ConsumeAsync(decorated);
+    }
+
+    public async Task AcknowledgeAsync(MessageEnvelope messageEnvelope)
+    {
+        var deliveryTagString = messageEnvelope.Headers[RabbitMqHeaders.DeliveryTag];
+        var deliveryTag = ulong.Parse(deliveryTagString);
+
+        await _channel.BasicAckAsync(deliveryTag, false);
     }
 
     public async ValueTask DisposeAsync()
     {
-        await CastAndDispose(_channel);
-        await CastAndDispose(_connection);
+        GC.SuppressFinalize(this);
 
-        return;
-
-        static async ValueTask CastAndDispose(IDisposable resource)
-        {
-            if (resource is IAsyncDisposable resourceAsyncDisposable)
-                await resourceAsyncDisposable.DisposeAsync();
-            else
-                resource.Dispose();
-        }
+        await _channel.DisposeAsync();
+        await _connection.DisposeAsync();
     }
 }

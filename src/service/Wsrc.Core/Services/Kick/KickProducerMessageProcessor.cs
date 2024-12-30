@@ -25,12 +25,17 @@ public class KickProducerMessageProcessor(IKickEventStrategyHandler eventStrateg
 
             var data = await reader.ReadToEndAsync();
 
-            var kickEvent = JsonSerializer.Deserialize<KickEvent>(data) ?? throw new InvalidOperationException();
-            var pusherEvent = PusherEvent.Parse(kickEvent.Event);
+            var message = new MessageEnvelope
+            {
+                Payload = data,
+            };
 
-            var handler = eventStrategyHandler.GetStrategy(pusherEvent) ?? throw new InvalidOperationException();
+            var kickEvent = JsonSerializer.Deserialize<KickEvent>(data);
+            var pusherEvent = PusherEvent.Parse(kickEvent!.Event);
 
-            await handler.ExecuteAsync(data);
+            var handler = eventStrategyHandler.GetStrategy(pusherEvent);
+
+            await handler.ExecuteAsync(message);
 
             ms.SetLength(0);
             ms.Seek(0, SeekOrigin.Begin);
