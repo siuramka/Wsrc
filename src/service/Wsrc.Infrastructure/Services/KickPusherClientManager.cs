@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 using Microsoft.Extensions.DependencyInjection;
 
 using Wsrc.Core.Interfaces;
@@ -12,11 +14,11 @@ public class KickPusherClientManager(
     IServiceScopeFactory serviceScopeFactory,
     IKickPusherClientFactory pusherClientFactory) : IKickPusherClientManager
 {
-    public List<IKickPusherClient> ActiveConnections { get; } = [];
+    private readonly ConcurrentBag<IKickPusherClient> _activeConnections = [];
 
-    public async Task Launch()
+    public async Task LaunchAsync()
     {
-        var kickPusherClients = await GetClients();
+        var kickPusherClients = await CreateClients();
 
         foreach (var kickPusherClient in kickPusherClients)
         {
@@ -24,7 +26,42 @@ public class KickPusherClientManager(
         }
     }
 
-    private async Task<IEnumerable<IKickPusherClient>> GetClients()
+    public async Task ReconnectAsync()
+    {
+        var kickPusherClients = await CreateDisconnectedClientsAsync();
+
+        foreach (var kickPusherClient in kickPusherClients)
+        {
+            await CreateConnection(kickPusherClient);
+        }
+    }
+
+    public IEnumerable<IKickPusherClient> GetActiveClients()
+    {
+        return _activeConnections;
+    }
+
+    private async Task<IEnumerable<IKickPusherClient>> CreateDisconnectedClientsAsync()
+    {
+        using var scope = serviceScopeFactory.CreateScope();
+        var channelRepository = scope.ServiceProvider
+                                    .GetService<IAsyncRepository<Channel>>()
+                                ?? throw new NullReferenceException();
+
+        var activeChannelsIds = _activeConnections
+            .Select(ac => ac.ChannelId)
+            .ToList();
+
+        var inactiveChannels = await channelRepository
+            .GetWhereAsync(c => !activeChannelsIds.Contains(c.Id));
+
+        var newKickPusherClients = pusherClientFactory
+            .CreateClients(inactiveChannels.ToList());
+
+        return newKickPusherClients;
+    }
+
+    private async Task<IEnumerable<IKickPusherClient>> CreateClients()
     {
         using var scope = serviceScopeFactory.CreateScope();
         var channelRepository = scope.ServiceProvider
@@ -47,11 +84,6 @@ public class KickPusherClientManager(
 
         await kickPusherClient.SubscribeAsync(connectionRequest);
 
-        ActiveConnections.Add(kickPusherClient);
-    }
-
-    public IKickPusherClient GetClient(int channelId)
-    {
-        return ActiveConnections.First(c => c.ChannelId == channelId);
+        _activeConnections.Add(kickPusherClient);
     }
 }

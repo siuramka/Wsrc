@@ -9,14 +9,29 @@ public class KickProducerFacade(
     IServiceScopeFactory serviceScopeFactory)
     : IKickProducerFacade
 {
-    public async Task HandleMessages()
-    {
-        await clientManager.Launch();
+    private readonly List<IKickPusherClient> _producingClients = [];
 
-        foreach (var kickPusherClient in clientManager.ActiveConnections)
-        {
-            _ = Task.Run(() => StartProcessing(kickPusherClient));
-        }
+    public async Task InitializeAsync()
+    {
+        await clientManager.LaunchAsync();
+        LaunchClientMessageProcessors();
+    }
+
+    public async Task HandleReconnectAsync()
+    {
+        await clientManager.ReconnectAsync();
+        LaunchClientMessageProcessors();
+    }
+
+    private void LaunchClientMessageProcessors()
+    {
+        var clients = clientManager.GetActiveClients();
+
+        var newClients = clients
+            .Where(client => !_producingClients.Contains(client))
+            .ToList();
+
+        _ = newClients.Select(client => Task.Run(() => StartProcessing(client))).ToList();
     }
 
     private async Task StartProcessing(IKickPusherClient kickPusherClient)
@@ -24,6 +39,8 @@ public class KickProducerFacade(
         using var scope = serviceScopeFactory.CreateScope();
         var messageProcessor = scope.ServiceProvider.GetService<IKickMessageProducerProcessor>()
                                ?? throw new NullReferenceException();
+
+        _producingClients.Add(kickPusherClient);
 
         await messageProcessor.ProcessChannelMessagesAsync(kickPusherClient);
     }
