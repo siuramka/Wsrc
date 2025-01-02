@@ -38,22 +38,22 @@ public class KickProducerFacadeTests
     }
 
     [Test]
-    public async Task HandleMessages_LaunchesClientManager()
+    public async Task InitializeAsync_LaunchesClientManager()
     {
         // Arrange
-        _kickPusherClientManager.ActiveConnections.Returns([]);
+        _kickPusherClientManager.GetActiveClients().Returns([]);
 
         // Act
-        await _kickProducerFacade.HandleMessages();
+        await _kickProducerFacade.InitializeAsync();
 
         // Assert
-        await _kickPusherClientManager.Received(1).Launch();
+        await _kickPusherClientManager.Received(1).LaunchAsync();
     }
 
     [Test]
     [TestCase(10)]
-    [TestCase(100)]
-    public async Task HandleMessages_ProcessesOnDifferentThreads(int clientCount)
+    [TestCase(1000)]
+    public async Task InitializeAsync_ProcessesOnDifferentThreads(int clientCount)
     {
         // Arrange
         var clients = Enumerable
@@ -61,29 +61,34 @@ public class KickProducerFacadeTests
             .Select(_ => Substitute.For<IKickPusherClient>())
             .ToList();
 
-        _kickPusherClientManager.ActiveConnections.Returns(clients);
+        _kickPusherClientManager.GetActiveClients().Returns(clients);
 
         var mainThreadId = Environment.CurrentManagedThreadId;
 
         var processingThreadIds = new ConcurrentBag<int>();
         var processingStarted = new TaskCompletionSource();
 
+        object threadLock = new();
+
         _kickMessageProducerProcessor
             .ProcessChannelMessagesAsync(Arg.Any<IKickPusherClient>())
             .Returns(Task.CompletedTask)
             .AndDoes(x =>
             {
-                processingThreadIds.Add(Environment.CurrentManagedThreadId);
-
-                var isLastClient = processingThreadIds.Count == clientCount;
-                if (isLastClient)
+                lock (threadLock)
                 {
-                    processingStarted.SetResult();
+                    processingThreadIds.Add(Environment.CurrentManagedThreadId);
+
+                    var isLastClient = processingThreadIds.Count == clientCount;
+                    if (isLastClient)
+                    {
+                        processingStarted.SetResult();
+                    }
                 }
             });
 
         // Act
-        await _kickProducerFacade.HandleMessages();
+        await _kickProducerFacade.InitializeAsync();
 
         await Task.WhenAny(processingStarted.Task);
 
@@ -92,5 +97,77 @@ public class KickProducerFacadeTests
 
         processingThreadIds.Count.Should().Be(clientCount);
         processingThreadIds.Should().NotContain(mainThreadId);
+    }
+
+    [Test]
+    [TestCase(10)]
+    [TestCase(1000)]
+    public async Task InitializeAsync_StartsProcessingClients(int clientCount)
+    {
+        // Arrange
+        var initialClients = Enumerable
+            .Range(0, clientCount)
+            .Select(_ => Substitute.For<IKickPusherClient>())
+            .ToList();
+
+        _kickPusherClientManager.GetActiveClients().Returns(initialClients);
+
+        // Act
+        await _kickProducerFacade.InitializeAsync();
+
+        // Assert
+        await _kickMessageProducerProcessor
+            .ProcessChannelMessagesAsync(Arg.Is<IKickPusherClient>(client => initialClients.Contains(client)));
+    }
+
+    [Test]
+    [TestCase(10)]
+    [TestCase(1000)]
+    public async Task HandleReconnectAsync_StartsProcessingClients(int clientCount)
+    {
+        // Arrange
+        var initialClients = Enumerable
+            .Range(0, clientCount)
+            .Select(_ => Substitute.For<IKickPusherClient>())
+            .ToList();
+
+        _kickPusherClientManager.GetActiveClients().Returns(initialClients);
+
+        // Act
+        await _kickProducerFacade.HandleReconnectAsync();
+
+        // Assert
+        await _kickMessageProducerProcessor
+            .ProcessChannelMessagesAsync(Arg.Is<IKickPusherClient>(client => initialClients.Contains(client)));
+    }
+
+    [Test]
+    public async Task HandleReconnectAsync_StartsProcessingClients_WhenAlreadyHaveActiveClients()
+    {
+        // Arrange
+        var initialClients = Enumerable
+            .Range(0, 5)
+            .Select(_ => Substitute.For<IKickPusherClient>())
+            .ToList();
+
+        _kickPusherClientManager.GetActiveClients().Returns(initialClients);
+
+        await _kickProducerFacade.InitializeAsync();
+
+        var newClients = Enumerable
+            .Range(0, 5)
+            .Select(_ => Substitute.For<IKickPusherClient>())
+            .ToList();
+
+        _kickPusherClientManager.GetActiveClients().Returns(newClients);
+
+        // Act
+        await _kickProducerFacade.HandleReconnectAsync();
+
+        // Assert
+        var allClients = initialClients.Concat(newClients).ToList();
+        await _kickMessageProducerProcessor
+            .ProcessChannelMessagesAsync(Arg.Is<IKickPusherClient>(client => allClients.Contains(client)));
+
     }
 }

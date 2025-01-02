@@ -2,9 +2,9 @@ namespace Wsrc.Core.Interfaces;
 
 public interface IKickPusherClientManager
 {
-    public List<IKickPusherClient> ActiveConnections { get; }
+    public IEnumerable<IKickPusherClient> GetActiveClients();
 
-    public IKickPusherClient GetClient(int channelId);
+    public Task LaunchAsync();
 
-    public Task Launch();
+    public Task ReconnectAsync();
 }

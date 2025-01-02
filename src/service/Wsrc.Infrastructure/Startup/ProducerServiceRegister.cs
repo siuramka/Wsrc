@@ -29,6 +29,7 @@ public static class ProducerServiceRegister
         services.AddTransient<IKickEventStrategy, PongEvent>();
         services.AddTransient<IKickEventStrategy, SubscribedEvent>();
         services.AddTransient<IKickEventStrategyHandler, KickEventStrategyHandler>();
+        services.AddTransient<IPeriodicTimer, WsrcPeriodicTimer>();
 
         services.AddScoped<IKickMessageProducerProcessor, KickProducerMessageProcessor>();
     }
