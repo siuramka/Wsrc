@@ -4,9 +4,9 @@ namespace Wsrc.Infrastructure.Services;
 
 public class WsrcPeriodicTimer : IPeriodicTimer
 {
-    private PeriodicTimer Timer { get; set; }
+    private PeriodicTimer Timer { get; set; } = null!;
 
-    public void InitializeAsync(TimeSpan period)
+    public void Initialize(TimeSpan period)
     {
         Timer = new PeriodicTimer(period);
     }

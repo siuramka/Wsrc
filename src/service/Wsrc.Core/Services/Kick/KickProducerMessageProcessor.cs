@@ -20,7 +20,7 @@ public class KickProducerMessageProcessor(IKickEventStrategyHandler eventStrateg
         {
             var result = await kickPusherClient.ReceiveAsync(buffer, CancellationToken.None);
 
-            ms.Write(buffer, 0, result.Count);
+            await ms.WriteAsync(buffer, 0, result.Count);
             ms.Seek(0, SeekOrigin.Begin);
 
             var data = await reader.ReadToEndAsync();

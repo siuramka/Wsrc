@@ -28,7 +28,7 @@ public class KickPusherClient(
     public async Task SubscribeAsync(KickChatConnectionRequest connectionRequest)
     {
         var connectionData = JsonSerializer.Serialize(connectionRequest);
-        await Send(connectionData);
+        await SendAsync(connectionData);
     }
 
     public async Task CloseAsync()
@@ -36,7 +36,7 @@ public class KickPusherClient(
         await _socketClient.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
     }
 
-    public async Task Send(string data)
+    public async Task SendAsync(string data)
     {
         await _socketClient.SendAsync(
             Encoding.UTF8.GetBytes(data),

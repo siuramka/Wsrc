@@ -16,7 +16,7 @@ public interface IKickPusherClient
 
     Task CloseAsync();
 
-    Task Send(string data);
+    Task SendAsync(string data);
 
     Task<WebSocketReceiveResult> ReceiveAsync(ArraySegment<byte> buffer, CancellationToken token);
 }

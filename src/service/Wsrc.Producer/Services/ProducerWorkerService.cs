@@ -14,7 +14,7 @@ public class ProducerWorkerService(
         using var scope = serviceScopeFactory.CreateScope();
         var periodicTimer = scope.ServiceProvider.GetRequiredService<IPeriodicTimer>();
 
-        periodicTimer.InitializeAsync(_reconnectPeriod);
+        periodicTimer.Initialize(_reconnectPeriod);
 
         await kickProducerFacade.InitializeAsync();
 

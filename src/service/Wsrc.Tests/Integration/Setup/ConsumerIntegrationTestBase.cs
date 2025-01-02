@@ -31,12 +31,12 @@ public abstract class ConsumerIntegrationTestBase : IntegrationTestBase
     }
 
     [TearDown]
-    public async Task Cleanup()
+    public async Task CleanupAsync()
     {
         await _host.StopAsync();
         _host.Dispose();
 
-        await CleanupContainers();
+        await CleanupContainersAsync();
     }
 
     private void BuildHost()

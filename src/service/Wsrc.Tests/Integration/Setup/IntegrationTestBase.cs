@@ -40,11 +40,11 @@ public abstract class IntegrationTestBase
         );
     }
 
-    protected async Task CleanupContainers()
+    protected async Task CleanupContainersAsync()
     {
         await Task.WhenAll(
-            CleanupRabbitMq(),
-            CleanupPostgres()
+            CleanupRabbitMqAsync(),
+            CleanupPostgresAsync()
         );
     }
 
@@ -91,13 +91,13 @@ public abstract class IntegrationTestBase
         await _rabbitMqContainer.StartAsync();
     }
 
-    private async Task CleanupRabbitMq()
+    private async Task CleanupRabbitMqAsync()
     {
         await _rabbitMqContainer.StopAsync();
         await _rabbitMqContainer.DisposeAsync();
     }
 
-    private async Task CleanupPostgres()
+    private async Task CleanupPostgresAsync()
     {
         await _postgreSqlContainer.StopAsync();
         await _postgreSqlContainer.DisposeAsync();
