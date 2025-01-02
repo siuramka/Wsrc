@@ -2,7 +2,7 @@ namespace Wsrc.Core.Interfaces;
 
 public interface IPeriodicTimer
 {
-    public void InitializeAsync(TimeSpan period);
+    public void Initialize(TimeSpan period);
 
     public Task<bool> WaitForNextTickAsync(CancellationToken stoppingToken);
 }

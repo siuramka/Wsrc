@@ -26,7 +26,7 @@ public abstract class ProducerIntegrationTestBase : IntegrationTestBase
     {
         await Task.WhenAll(
             SetupContainersAsync(),
-            SetupFakes()
+            SetupFakesAsync()
         );
 
         BuildHost();
@@ -36,11 +36,11 @@ public abstract class ProducerIntegrationTestBase : IntegrationTestBase
 
         await _host.StartAsync();
 
-        await WaitForPusherSubscriptions();
+        await WaitForPusherSubscriptionsAsync();
     }
 
     [TearDown]
-    public async Task Cleanup()
+    public async Task CleanupAsync()
     {
         await _fakePusherServer.StopAsync();
         await _fakePusherServer.DisposeAsync();
@@ -48,7 +48,7 @@ public abstract class ProducerIntegrationTestBase : IntegrationTestBase
         await _host.StopAsync();
         _host.Dispose();
 
-        await CleanupContainers();
+        await CleanupContainersAsync();
     }
 
     private void BuildHost()
@@ -80,13 +80,13 @@ public abstract class ProducerIntegrationTestBase : IntegrationTestBase
             .Build();
     }
 
-    private async Task SetupFakes()
+    private async Task SetupFakesAsync()
     {
         _fakePusherServer = new FakePusherServer();
         await _fakePusherServer.StartAsync();
     }
 
-    private async Task WaitForPusherSubscriptions()
+    private async Task WaitForPusherSubscriptionsAsync()
     {
         const int channelsCount = 2;
 

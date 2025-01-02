@@ -31,10 +31,10 @@ public class KickProducerFacade(
             .Where(client => !_producingClients.Contains(client))
             .ToList();
 
-        _ = newClients.Select(client => Task.Run(() => StartProcessing(client))).ToList();
+        _ = newClients.Select(client => Task.Run(() => StartProcessingAsync(client))).ToList();
     }
 
-    private async Task StartProcessing(IKickPusherClient kickPusherClient)
+    private async Task StartProcessingAsync(IKickPusherClient kickPusherClient)
     {
         using var scope = serviceScopeFactory.CreateScope();
         var messageProcessor = scope.ServiceProvider.GetService<IKickMessageProducerProcessor>()

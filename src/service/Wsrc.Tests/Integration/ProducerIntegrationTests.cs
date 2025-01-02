@@ -38,12 +38,14 @@ public class ProducerIntegrationTests : ProducerIntegrationTestBase
 
         var receivedMessageTask = new TaskCompletionSource<string>();
 
-        await testRabbitMqClientStub.ConsumeMessagesAsync(async (_, ea) =>
+        await testRabbitMqClientStub.ConsumeMessagesAsync((_, ea) =>
         {
             var body = ea.Body.ToArray();
             var consumedMessage = Encoding.UTF8.GetString(body);
 
             receivedMessageTask.SetResult(consumedMessage);
+
+            return Task.CompletedTask;
         });
 
         var firstChannelConnection = _fakePusherServer.ActiveConnections.First();

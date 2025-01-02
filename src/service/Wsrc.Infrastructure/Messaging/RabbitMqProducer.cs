@@ -11,7 +11,7 @@ namespace Wsrc.Infrastructure.Messaging;
 
 public class RabbitMqProducer(IRabbitMqClient rabbitMqClient) : IProducerService
 {
-    public async Task SendMessage(MessageEnvelope messageEnvelope)
+    public async Task SendMessageAsync(MessageEnvelope messageEnvelope)
     {
         await using var connection = await rabbitMqClient.CreateConnectionAsync();
         await using var channel = await connection.CreateChannelAsync();

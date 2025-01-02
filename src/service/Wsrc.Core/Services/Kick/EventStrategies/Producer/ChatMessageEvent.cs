@@ -12,6 +12,6 @@ public class ChatMessageEvent(IProducerService producerService) : IKickEventStra
 
     public async Task ExecuteAsync(MessageEnvelope messageEnvelope)
     {
-        await producerService.SendMessage(messageEnvelope);
+        await producerService.SendMessageAsync(messageEnvelope);
     }
 }

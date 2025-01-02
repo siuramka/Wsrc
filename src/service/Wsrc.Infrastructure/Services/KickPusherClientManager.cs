@@ -18,11 +18,11 @@ public class KickPusherClientManager(
 
     public async Task LaunchAsync()
     {
-        var kickPusherClients = await CreateClients();
+        var kickPusherClients = await CreateClientsAsync();
 
         foreach (var kickPusherClient in kickPusherClients)
         {
-            await CreateConnection(kickPusherClient);
+            await CreateConnectionAsync(kickPusherClient);
         }
     }
 
@@ -32,7 +32,7 @@ public class KickPusherClientManager(
 
         foreach (var kickPusherClient in kickPusherClients)
         {
-            await CreateConnection(kickPusherClient);
+            await CreateConnectionAsync(kickPusherClient);
         }
     }
 
@@ -61,7 +61,7 @@ public class KickPusherClientManager(
         return newKickPusherClients;
     }
 
-    private async Task<IEnumerable<IKickPusherClient>> CreateClients()
+    private async Task<IEnumerable<IKickPusherClient>> CreateClientsAsync()
     {
         using var scope = serviceScopeFactory.CreateScope();
         var channelRepository = scope.ServiceProvider
@@ -74,7 +74,7 @@ public class KickPusherClientManager(
         return kickPusherClients;
     }
 
-    private async Task CreateConnection(IKickPusherClient kickPusherClient)
+    private async Task CreateConnectionAsync(IKickPusherClient kickPusherClient)
     {
         await kickPusherClient.ConnectAsync();
 
