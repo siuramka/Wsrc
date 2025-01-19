@@ -6,6 +6,7 @@ namespace Wsrc.Core.Services.Kick;
 
 public class KickProducerFacade(
     IKickPusherClientManager clientManager,
+    IActiveClientsManager activeClientsManager,
     IServiceScopeFactory serviceScopeFactory)
     : IKickProducerFacade
 {
@@ -37,7 +38,7 @@ public class KickProducerFacade(
 
     private void LaunchClientMessageProcessors()
     {
-        var clients = clientManager.GetActiveClients();
+        var clients = activeClientsManager.GetActiveClients();
 
         var newClients = clients
             .Where(client => !_producingClients.Contains(client))

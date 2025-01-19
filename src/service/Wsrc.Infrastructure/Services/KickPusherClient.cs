@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 
 using Wsrc.Core.Interfaces;
 using Wsrc.Domain;
+using Wsrc.Domain.Models;
 using Wsrc.Infrastructure.Configuration;
 
 namespace Wsrc.Infrastructure.Services;

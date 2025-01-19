@@ -23,6 +23,8 @@ public static class ProducerServiceRegister
         services.AddSingleton<IProducerService, RabbitMqProducer>();
         services.AddSingleton<IKickProducerFacade, KickProducerFacade>();
         services.AddSingleton<IKickPusherClientManager, KickPusherClientManager>();
+        services.AddSingleton<IActiveClientsManager, ActiveClientsManager>();
+        services.AddSingleton<IActiveKickPusherClientFactory, ActiveKickPusherClientFactory>();
 
         services.AddTransient<IKickEventStrategy, ChatMessageEvent>();
         services.AddTransient<IKickEventStrategy, ConnectedEvent>();
