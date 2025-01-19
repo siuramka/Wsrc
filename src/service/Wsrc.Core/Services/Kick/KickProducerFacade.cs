@@ -64,7 +64,7 @@ public class KickProducerFacade(
         {
             _producingClients.Remove(kickPusherClient);
         }
-        
+
         await clientManager.HandleDisconnectAsync(kickPusherClient.ChannelId);
     }
 }

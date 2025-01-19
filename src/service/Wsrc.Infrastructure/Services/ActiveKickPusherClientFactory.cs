@@ -7,9 +7,9 @@ using Wsrc.Domain.Entities;
 namespace Wsrc.Infrastructure.Services;
 
 public class ActiveKickPusherClientFactory(
-    IActiveClientsManager activeClientsManager, 
+    IActiveClientsManager activeClientsManager,
     IServiceScopeFactory serviceScopeFactory,
-    IKickPusherClientFactory pusherClientFactory) 
+    IKickPusherClientFactory pusherClientFactory)
     : IActiveKickPusherClientFactory
 {
     public async Task<IEnumerable<IKickPusherClient>> CreateDisconnectedClientsAsync()

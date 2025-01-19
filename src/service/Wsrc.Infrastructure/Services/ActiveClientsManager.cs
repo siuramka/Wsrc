@@ -28,7 +28,7 @@ public class ActiveClientsManager : IActiveClientsManager
             _semaphoreSlim.Release();
         }
     }
-    
+
     public async Task AddAsync(IKickPusherClient client)
     {
         await _semaphoreSlim.WaitAsync();
@@ -43,4 +43,3 @@ public class ActiveClientsManager : IActiveClientsManager
         }
     }
 }
-

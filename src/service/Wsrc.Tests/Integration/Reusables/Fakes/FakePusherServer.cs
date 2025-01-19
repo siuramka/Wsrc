@@ -88,7 +88,7 @@ public class FakePusherServer : IAsyncDisposable
             var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cts.Token);
             return Encoding.UTF8.GetString(buffer, 0, result.Count);
         }
-        catch(TaskCanceledException _)
+        catch (TaskCanceledException _)
         {
             return string.Empty;
         }

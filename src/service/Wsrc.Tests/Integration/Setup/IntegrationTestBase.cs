@@ -47,20 +47,20 @@ public abstract class IntegrationTestBase
             CleanupPostgresAsync()
         );
     }
-    
+
     protected static async Task ClearDatabaseAsync(IHost host)
     {
         using var scope = host.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<WsrcContext>();
 
-        const string query = 
+        const string query =
             @"
                 DELETE FROM ""Messages"";
                 DELETE FROM ""Senders"";
                 DELETE FROM ""Chatrooms"";
                 DELETE FROM ""Channels"";
             ";
-        
+
         await context.Database.ExecuteSqlRawAsync(query);
     }
 

@@ -5,7 +5,7 @@ namespace Wsrc.Infrastructure.Services;
 
 public class KickPusherClientManager(
     IActiveKickPusherClientFactory kickPusherClientFactory,
-    IActiveClientsManager activeClientsManager) 
+    IActiveClientsManager activeClientsManager)
     : IKickPusherClientManager
 {
     public async Task LaunchAsync()

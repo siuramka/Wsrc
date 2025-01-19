@@ -44,7 +44,7 @@ public class ProducerIntegrationTests : ProducerIntegrationTestBase
             .ActiveConnections
             .First()
             .Key;
-        
+
         var message = new KickChatMessageProvider().Create();
 
         // Act

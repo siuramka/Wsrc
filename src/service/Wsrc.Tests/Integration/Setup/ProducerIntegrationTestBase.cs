@@ -42,13 +42,13 @@ public abstract class ProducerIntegrationTestBase : IntegrationTestBase
 
         await WaitForPusherSubscriptionsAsync();
     }
-    
+
     [OneTimeSetUp]
     public async Task OneTimeSetUpAsync()
     {
         await InitializeAsync();
     }
-    
+
     [SetUp]
     public async Task SetUpAsync()
     {
@@ -66,17 +66,17 @@ public abstract class ProducerIntegrationTestBase : IntegrationTestBase
         await ClearDatabaseAsync(_host);
         await SeedRequiredDataAsync(_host);
         await _fakePusherServer.DropConnectionsAsync();
-        
+
         var getHasDisconnected = () => _fakePusherServer.ActiveConnections.Count == 0;
         await TimeoutHelper.WaitUntilAsync(getHasDisconnected);
     }
-    
+
 
     [OneTimeTearDown]
     public async Task OneTimeTearDownAsync()
     {
-         await CleanupContainersAsync();
-        
+        await CleanupContainersAsync();
+
         await _fakePusherServer.StopAsync();
         await _fakePusherServer.DisposeAsync();
 

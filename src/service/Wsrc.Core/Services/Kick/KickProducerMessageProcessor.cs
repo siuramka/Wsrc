@@ -20,7 +20,7 @@ public class KickProducerMessageProcessor(IKickEventStrategyHandler eventStrateg
         while (true)
         {
             var result = await kickPusherClient.ReceiveAsync(buffer, CancellationToken.None);
-            
+
             if (result.MessageType == WebSocketMessageType.Close)
             {
                 return;
