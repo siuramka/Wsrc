@@ -49,4 +49,14 @@ public class KickPusherClient(
     {
         return await _socketClient.ReceiveAsync(buffer, token);
     }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is KickPusherClient client && ChannelId == client.ChannelId;
+    }
+
+    public override int GetHashCode()
+    {
+        return ChannelId;
+    }
 }
