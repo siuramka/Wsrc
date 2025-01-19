@@ -1,5 +1,3 @@
-using System.Collections.Concurrent;
-
 using Microsoft.Extensions.DependencyInjection;
 
 using Wsrc.Core.Interfaces;
@@ -14,7 +12,11 @@ public class KickPusherClientManager(
     IServiceScopeFactory serviceScopeFactory,
     IKickPusherClientFactory pusherClientFactory) : IKickPusherClientManager
 {
-    private readonly ConcurrentBag<IKickPusherClient> _activeConnections = [];
+    private readonly List<IKickPusherClient> _activeConnections = [];
+
+    private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
+
+    private readonly Lock _lock = new();
 
     public async Task LaunchAsync()
     {
@@ -39,6 +41,21 @@ public class KickPusherClientManager(
     public IEnumerable<IKickPusherClient> GetActiveClients()
     {
         return _activeConnections;
+    }
+
+    public async Task HandleDisconnectAsync(int channelId)
+    {
+        await _semaphoreSlim.WaitAsync();
+
+        try
+        {
+            var client = _activeConnections.First(c => c.ChannelId == channelId);
+            _activeConnections.Remove(client);
+        }
+        finally
+        {
+            _semaphoreSlim.Release();
+        }
     }
 
     private async Task<IEnumerable<IKickPusherClient>> CreateDisconnectedClientsAsync()
@@ -84,6 +101,9 @@ public class KickPusherClientManager(
 
         await kickPusherClient.SubscribeAsync(connectionRequest);
 
-        _activeConnections.Add(kickPusherClient);
+        lock (_lock)
+        {
+            _activeConnections.Add(kickPusherClient);
+        }
     }
 }

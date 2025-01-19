@@ -11,6 +11,8 @@ public class KickProducerFacade(
 {
     private readonly List<IKickPusherClient> _producingClients = [];
 
+    private readonly Lock _lock = new();
+
     public async Task InitializeAsync()
     {
         await clientManager.LaunchAsync();
@@ -21,6 +23,16 @@ public class KickProducerFacade(
     {
         await clientManager.ReconnectAsync();
         LaunchClientMessageProcessors();
+    }
+
+    public void HandleDisconnect(int channelId)
+    {
+        lock (_lock)
+        {
+            var client = _producingClients.First(c => c.ChannelId == channelId);
+
+            _producingClients.Remove(client);
+        }
     }
 
     private void LaunchClientMessageProcessors()
@@ -40,8 +52,18 @@ public class KickProducerFacade(
         var messageProcessor = scope.ServiceProvider.GetService<IKickMessageProducerProcessor>()
                                ?? throw new NullReferenceException();
 
-        _producingClients.Add(kickPusherClient);
+        lock (_lock)
+        {
+            _producingClients.Add(kickPusherClient);
+        }
 
         await messageProcessor.ProcessChannelMessagesAsync(kickPusherClient);
+
+        lock (_lock)
+        {
+            _producingClients.Remove(kickPusherClient);
+        }
+        
+        await clientManager.HandleDisconnectAsync(kickPusherClient.ChannelId);
     }
 }
