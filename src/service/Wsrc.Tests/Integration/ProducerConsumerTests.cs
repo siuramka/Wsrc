@@ -24,7 +24,7 @@ public class ProducerConsumerTests : ProducerConsumerIntegrationTestBase
         int messageCount)
     {
         // Arrange
-        var firstChannelConnection = _fakePusherServer.ActiveConnections.First();
+        var firstChannelConnection = _fakePusherServer.ActiveConnections.First().Key;
         var firstChannel = new ChannelProvider().ProvideDefault().First();
         var message = new kickChatMessageBufferProvider().ProvideSerialized(firstChannel.Id.ToString());
 

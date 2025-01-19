@@ -32,7 +32,7 @@ public abstract class ProducerConsumerIntegrationTestBase : IntegrationTestBase
         BuildProducerHost();
         BuildConsumerHost();
 
-        await UpdateDatabaseAsync(_producerHost);
+        await MigrateDatabaseAsync(_producerHost);
         await SeedRequiredDataAsync(_producerHost);
 
         await Task.WhenAll(
