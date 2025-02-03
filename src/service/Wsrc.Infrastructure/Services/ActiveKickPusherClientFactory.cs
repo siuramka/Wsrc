@@ -23,11 +23,12 @@ public class ActiveKickPusherClientFactory(
             .Select(ac => ac.ChannelId)
             .ToList();
 
+        //TODO: repository
         var inactiveChannels = await channelRepository
             .GetWhereAsync(c => !activeChannelsIds.Contains(c.Id));
 
         var newKickPusherClients = pusherClientFactory
-            .CreateClients(inactiveChannels.ToList());
+            .CreateClients(inactiveChannels);
 
         return newKickPusherClients;
     }
@@ -41,7 +42,7 @@ public class ActiveKickPusherClientFactory(
 
         var channels = await channelRepository.GetAllAsync();
 
-        var kickPusherClients = pusherClientFactory.CreateClients(channels.ToList());
+        var kickPusherClients = pusherClientFactory.CreateClients(channels);
         return kickPusherClients;
     }
 }
