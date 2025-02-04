@@ -11,7 +11,7 @@ namespace Wsrc.Tests.Integration.Reusables.Fakes;
 
 public class FakePusherServer : IAsyncDisposable
 {
-    public readonly List<WebSocket> ActiveConnections = [];
+    public readonly Dictionary<WebSocket, CancellationTokenSource> ActiveConnections = [];
     private WebApplication _app = null!;
 
     public async Task StartAsync()
@@ -40,37 +40,58 @@ public class FakePusherServer : IAsyncDisposable
         return "ws://localhost:5000/app/1234";
     }
 
+    public async Task DropConnectionsAsync()
+    {
+        foreach (var connection in ActiveConnections)
+        {
+            await connection.Key.CloseOutputAsync(
+                WebSocketCloseStatus.NormalClosure,
+                "integrationTest:close",
+                CancellationToken.None);
+
+            await connection.Value.CancelAsync();
+        }
+
+        ActiveConnections.Clear();
+    }
+
     private async Task HandleConnectionAsync(WebSocket webSocket)
     {
+        var cts = new CancellationTokenSource();
+
         while (webSocket.State == WebSocketState.Open)
         {
-            var message = await GetMessageAsync(webSocket);
+            var message = await GetMessageAsync(webSocket, cts);
             var kickEvent = JsonSerializer.Deserialize<KickEvent>(message);
             var pusherEvent = PusherEvent.Parse(kickEvent!.Event);
 
             if (pusherEvent.Event == PusherEvent.Connected.Event)
             {
-                var connectionEstablished = new
-                {
-                    @event = PusherEvent.Connected.Event,
-                };
+                var connectionEstablished = new { @event = PusherEvent.Connected.Event, };
 
                 await SendMessageAsync(webSocket, connectionEstablished);
             }
 
             if (pusherEvent!.Event == PusherEvent.Subscribe.Event)
             {
-                ActiveConnections.Add(webSocket);
+                ActiveConnections.Add(webSocket, cts);
             }
         }
     }
 
-    private static async Task<string> GetMessageAsync(WebSocket webSocket)
+    private static async Task<string> GetMessageAsync(WebSocket webSocket, CancellationTokenSource cts)
     {
         var buffer = new byte[1024 * 4];
-        var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
-        return Encoding.UTF8.GetString(buffer, 0, result.Count);
+        try
+        {
+            var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cts.Token);
+            return Encoding.UTF8.GetString(buffer, 0, result.Count);
+        }
+        catch (TaskCanceledException _)
+        {
+            return string.Empty;
+        }
     }
 
     public async Task SendMessageAsync(WebSocket webSocket, object message)

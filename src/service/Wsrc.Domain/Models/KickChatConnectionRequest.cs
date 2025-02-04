@@ -1,8 +1,6 @@
 using System.Text.Json.Serialization;
 
-using Wsrc.Domain.Models;
-
-namespace Wsrc.Domain;
+namespace Wsrc.Domain.Models;
 
 public class KickChatConnectionRequest(int chatroomId, PusherEvent pusherEvent)
 {

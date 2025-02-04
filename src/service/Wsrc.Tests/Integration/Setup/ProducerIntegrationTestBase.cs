@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+using Wsrc.Core.Interfaces;
 using Wsrc.Infrastructure.Configuration;
 using Wsrc.Infrastructure.Persistence;
 using Wsrc.Infrastructure.Startup;
@@ -18,7 +19,10 @@ namespace Wsrc.Tests.Integration.Setup;
 public abstract class ProducerIntegrationTestBase : IntegrationTestBase
 {
     protected FakePusherServer _fakePusherServer = null!;
+
+#pragma warning disable NUnit1032
     private IHost _host = null!;
+#pragma warning restore NUnit1032
 
     private readonly TestConfigurationsSetup _configSetup = new();
 
@@ -29,9 +33,9 @@ public abstract class ProducerIntegrationTestBase : IntegrationTestBase
             SetupFakesAsync()
         );
 
-        BuildHost();
+        _host = BuildHost();
 
-        await UpdateDatabaseAsync(_host);
+        await MigrateDatabaseAsync(_host);
         await SeedRequiredDataAsync(_host);
 
         await _host.StartAsync();
@@ -39,21 +43,50 @@ public abstract class ProducerIntegrationTestBase : IntegrationTestBase
         await WaitForPusherSubscriptionsAsync();
     }
 
-    [TearDown]
-    public async Task CleanupAsync()
+    [OneTimeSetUp]
+    public async Task OneTimeSetUpAsync()
     {
+        await InitializeAsync();
+    }
+
+    [SetUp]
+    public async Task SetUpAsync()
+    {
+        using var scope = _host.Services.CreateScope();
+        var facade = scope.ServiceProvider.GetRequiredService<IKickProducerFacade>();
+        await facade.HandleReconnectAsync();
+
+        var getHasReconnected = () => _fakePusherServer.ActiveConnections.Count == 2;
+        await TimeoutHelper.WaitUntilAsync(getHasReconnected);
+    }
+
+    [TearDown]
+    public async Task TearDownAsync()
+    {
+        await ClearDatabaseAsync(_host);
+        await SeedRequiredDataAsync(_host);
+        await _fakePusherServer.DropConnectionsAsync();
+
+        var getHasDisconnected = () => _fakePusherServer.ActiveConnections.Count == 0;
+        await TimeoutHelper.WaitUntilAsync(getHasDisconnected);
+    }
+
+
+    [OneTimeTearDown]
+    public async Task OneTimeTearDownAsync()
+    {
+        await CleanupContainersAsync();
+
         await _fakePusherServer.StopAsync();
         await _fakePusherServer.DisposeAsync();
 
         await _host.StopAsync();
         _host.Dispose();
-
-        await CleanupContainersAsync();
     }
 
-    private void BuildHost()
+    private IHost BuildHost()
     {
-        _host = Host.CreateDefaultBuilder()
+        return Host.CreateDefaultBuilder()
             .ConfigureAppConfiguration(config =>
             {
                 config.AddInMemoryCollection(_configSetup.GetRabbitMqConfig(RabbitMqConfiguration)!);

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 
 using Wsrc.Core.Interfaces;
 using Wsrc.Domain;
+using Wsrc.Domain.Models;
 using Wsrc.Infrastructure.Configuration;
 
 namespace Wsrc.Infrastructure.Services;
@@ -48,5 +49,15 @@ public class KickPusherClient(
     public async Task<WebSocketReceiveResult> ReceiveAsync(ArraySegment<byte> buffer, CancellationToken token)
     {
         return await _socketClient.ReceiveAsync(buffer, token);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is KickPusherClient client && ChannelId == client.ChannelId;
+    }
+
+    public override int GetHashCode()
+    {
+        return ChannelId;
     }
 }

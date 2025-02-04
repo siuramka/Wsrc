@@ -12,19 +12,11 @@ namespace Wsrc.Tests.Integration;
 [TestFixture]
 public class ProducerIntegrationTests : ProducerIntegrationTestBase
 {
-    [SetUp]
-    public async Task SetUp()
-    {
-        await InitializeAsync();
-    }
-
     [Test]
     public void Producer_ConnectsChannelsAndSubscribesToPusher()
     {
-        // Arrange
-        const int channelsCount = 2;
-
         // Assert
+        const int channelsCount = 2;
         _fakePusherServer.ActiveConnections.Count.Should().Be(channelsCount);
     }
 
@@ -48,7 +40,11 @@ public class ProducerIntegrationTests : ProducerIntegrationTestBase
             return Task.CompletedTask;
         });
 
-        var firstChannelConnection = _fakePusherServer.ActiveConnections.First();
+        var firstChannelConnection = _fakePusherServer
+            .ActiveConnections
+            .First()
+            .Key;
+
         var message = new KickChatMessageProvider().Create();
 
         // Act

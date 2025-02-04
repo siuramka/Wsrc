@@ -23,25 +23,30 @@ public class KickProducerFacadeTests
     private IKickMessageProducerProcessor _kickMessageProducerProcessor;
 
     private KickProducerFacade _kickProducerFacade;
+    private IActiveClientsManager _activeClientsManager;
 
     [SetUp]
     public void SetUp()
     {
         (_serviceProvider, _serviceScopeFactory) = new ServiceProviderMock().SetupMock();
 
-        _kickPusherClientManager = Substitute.For<IKickPusherClientManager>();
         _kickMessageProducerProcessor = Substitute.For<IKickMessageProducerProcessor>();
+        _kickPusherClientManager = Substitute.For<IKickPusherClientManager>();
+        _activeClientsManager = Substitute.For<IActiveClientsManager>();
 
         _serviceProvider.GetService<IKickMessageProducerProcessor>().Returns(_kickMessageProducerProcessor);
 
-        _kickProducerFacade = new KickProducerFacade(_kickPusherClientManager, _serviceScopeFactory);
+        _kickProducerFacade = new KickProducerFacade(
+            _kickPusherClientManager,
+            _activeClientsManager,
+            _serviceScopeFactory);
     }
 
     [Test]
     public async Task InitializeAsync_LaunchesClientManager()
     {
         // Arrange
-        _kickPusherClientManager.GetActiveClients().Returns([]);
+        _activeClientsManager.GetActiveClients().Returns([]);
 
         // Act
         await _kickProducerFacade.InitializeAsync();
@@ -61,7 +66,7 @@ public class KickProducerFacadeTests
             .Select(_ => Substitute.For<IKickPusherClient>())
             .ToList();
 
-        _kickPusherClientManager.GetActiveClients().Returns(clients);
+        _activeClientsManager.GetActiveClients().Returns(clients);
 
         var mainThreadId = Environment.CurrentManagedThreadId;
 
@@ -110,7 +115,7 @@ public class KickProducerFacadeTests
             .Select(_ => Substitute.For<IKickPusherClient>())
             .ToList();
 
-        _kickPusherClientManager.GetActiveClients().Returns(initialClients);
+        _activeClientsManager.GetActiveClients().Returns(initialClients);
 
         // Act
         await _kickProducerFacade.InitializeAsync();
@@ -131,7 +136,7 @@ public class KickProducerFacadeTests
             .Select(_ => Substitute.For<IKickPusherClient>())
             .ToList();
 
-        _kickPusherClientManager.GetActiveClients().Returns(initialClients);
+        _activeClientsManager.GetActiveClients().Returns(initialClients);
 
         // Act
         await _kickProducerFacade.HandleReconnectAsync();
@@ -150,7 +155,7 @@ public class KickProducerFacadeTests
             .Select(_ => Substitute.For<IKickPusherClient>())
             .ToList();
 
-        _kickPusherClientManager.GetActiveClients().Returns(initialClients);
+        _activeClientsManager.GetActiveClients().Returns(initialClients);
 
         await _kickProducerFacade.InitializeAsync();
 
@@ -159,7 +164,7 @@ public class KickProducerFacadeTests
             .Select(_ => Substitute.For<IKickPusherClient>())
             .ToList();
 
-        _kickPusherClientManager.GetActiveClients().Returns(newClients);
+        _activeClientsManager.GetActiveClients().Returns(newClients);
 
         // Act
         await _kickProducerFacade.HandleReconnectAsync();

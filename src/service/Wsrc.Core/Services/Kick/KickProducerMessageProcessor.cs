@@ -1,3 +1,4 @@
+using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 
@@ -20,7 +21,12 @@ public class KickProducerMessageProcessor(IKickEventStrategyHandler eventStrateg
         {
             var result = await kickPusherClient.ReceiveAsync(buffer, CancellationToken.None);
 
-            await ms.WriteAsync(buffer, 0, result.Count);
+            if (result.MessageType == WebSocketMessageType.Close)
+            {
+                return;
+            }
+
+            await ms.WriteAsync(buffer.AsMemory(0, result.Count));
             ms.Seek(0, SeekOrigin.Begin);
 
             var data = await reader.ReadToEndAsync();

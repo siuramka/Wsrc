@@ -24,7 +24,7 @@ public abstract class ConsumerIntegrationTestBase : IntegrationTestBase
 
         BuildHost();
 
-        await UpdateDatabaseAsync(_host);
+        await MigrateDatabaseAsync(_host);
         await SeedRequiredDataAsync(_host);
 
         await _host.StartAsync();
