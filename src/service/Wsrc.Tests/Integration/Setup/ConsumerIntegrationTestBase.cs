@@ -15,7 +15,9 @@ namespace Wsrc.Tests.Integration.Setup;
 
 public abstract class ConsumerIntegrationTestBase : IntegrationTestBase
 {
+#pragma warning disable NUnit1032
     protected IHost _host = null!;
+#pragma warning restore NUnit1032
     private readonly TestConfigurationsSetup _configSetup = new();
 
     protected async Task InitializeAsync()
@@ -29,14 +31,27 @@ public abstract class ConsumerIntegrationTestBase : IntegrationTestBase
 
         await _host.StartAsync();
     }
-
-    [TearDown]
-    public async Task CleanupAsync()
+    
+    [OneTimeSetUp]
+    public async Task OneTimeSetUpAsync()
     {
+        await InitializeAsync();
+    }
+
+    [OneTimeTearDown]
+    public async Task OneTimeTearDownAsync()
+    {
+        await CleanupContainersAsync();
+        
         await _host.StopAsync();
         _host.Dispose();
+    }
 
-        await CleanupContainersAsync();
+    [TearDown]
+    public async Task TearDownAsync()
+    {
+        await ClearDatabaseAsync(_host);
+        await SeedRequiredDataAsync(_host);
     }
 
     private void BuildHost()
