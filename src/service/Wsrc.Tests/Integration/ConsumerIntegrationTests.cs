@@ -12,12 +12,6 @@ namespace Wsrc.Tests.Integration;
 [TestFixture]
 public class ConsumerIntegrationTests : ConsumerIntegrationTestBase
 {
-    [SetUp]
-    public async Task SetUp()
-    {
-        await InitializeAsync();
-    }
-
     [Test]
     [TestCase(100)]
     [TestCase(1000)]
